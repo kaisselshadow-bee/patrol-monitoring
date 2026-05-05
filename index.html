@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1e3c72">
-    <meta name="description" content="Sistem Monitoring Patroli Lapas Kelas IIA Banyuasin">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUGF0cm9sIE1vbml0b3JpbmciLCJzaG9ydF9uYW1lIjoiUGF0cm9sIiwiZGVzY3JpcHRpb24iOiJTaXN0ZW0gTW9uaXRvcmluZyBQYXRyb2xpIExhcGFzIiwidGhlbWVfY29sb3IiOiIjMWUzYzcyIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInN0YXJ0X3VybCI6Ii8iLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3RleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCclM0UlRjAlOUYlOUIlQTElM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
     <title>Sistem Monitoring Patroli - Lapas Kelas IIA Banyuasin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -46,6 +45,24 @@
         .header p {
             color: #666;
             font-size: 14px;
+        }
+
+        .connection-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .tab-buttons {
@@ -186,10 +203,6 @@
             color: #333;
         }
 
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
         .status-message {
             padding: 15px;
             border-radius: 8px;
@@ -240,15 +253,6 @@
             border-radius: 8px;
             margin-top: 10px;
             cursor: pointer;
-        }
-
-        .patrol-record img.lazy {
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .patrol-record img.loaded {
-            opacity: 1;
         }
 
         .stats-grid {
@@ -371,6 +375,7 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -385,22 +390,28 @@
             animation: spin 1s linear infinite;
         }
 
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        .storage-info {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
+        .cloud-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
 
-        .storage-info p {
+        .cloud-info p {
             margin: 5px 0;
-            color: #856404;
+            color: #0c5460;
         }
 
         @media (max-width: 768px) {
@@ -428,6 +439,7 @@
         <!-- LOADING OVERLAY -->
         <div id="loading-overlay" class="loading-overlay hidden">
             <div class="spinner"></div>
+            <div class="loading-text">Memproses...</div>
         </div>
 
         <!-- LOGIN SCREEN -->
@@ -451,8 +463,9 @@
         <!-- MAIN APP -->
         <div id="main-app">
             <div class="header">
-                <h1>🛡️ Sistem Monitoring Patroli</h1>
+                <h1>🛡️ Sistem Monitoring Patroli (Cloud)</h1>
                 <p>Lapas Kelas IIA Banyuasin - Bidang Pengamanan</p>
+                <span id="connection-status" class="connection-status status-online">🟢 Online - Tersimpan di Cloud</span>
             </div>
 
             <div class="tab-buttons">
@@ -495,7 +508,7 @@
 
                         <div style="margin-top: 20px;">
                             <button class="btn btn-primary" onclick="capturePhoto()">📸 Ambil Foto</button>
-                            <button class="btn btn-success" onclick="savePatrolRecord()">💾 Simpan Data Patroli</button>
+                            <button class="btn btn-success" onclick="savePatrolRecord()">💾 Simpan ke Cloud</button>
                             <button class="btn btn-danger" onclick="cancelCamera()">❌ Batal</button>
                         </div>
                     </div>
@@ -521,10 +534,10 @@
                         <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="logout()">Logout</button>
                     </div>
 
-                    <div class="storage-info">
-                        <p>📦 <strong>Storage:</strong> <span id="storage-used">0</span> MB digunakan</p>
-                        <p>📸 <strong>Total Foto:</strong> <span id="total-photos">0</span> foto tersimpan</p>
-                        <p>⏰ Data otomatis terhapus setelah 30 hari</p>
+                    <div class="cloud-info">
+                        <p>☁️ <strong>Status:</strong> Terhubung ke Supabase Cloud</p>
+                        <p>📊 <strong>Total Patroli:</strong> <span id="total-cloud-patrols">0</span> data tersimpan</p>
+                        <p>🔄 Data otomatis tersimpan dan tersinkronisasi ke semua perangkat</p>
                     </div>
 
                     <div class="card">
@@ -571,6 +584,7 @@
                         </div>
                         <button class="btn btn-primary" onclick="applyFilters()">🔍 Terapkan Filter</button>
                         <button class="btn btn-success" onclick="exportToPDF()">📄 Export PDF</button>
+                        <button class="btn btn-warning" onclick="refreshData()">🔄 Refresh Data</button>
                     </div>
 
                     <div class="card">
@@ -585,7 +599,7 @@
                 <div class="card">
                     <h2>📍 Daftar Titik Patroli</h2>
                     <p style="color: #666; margin-bottom: 20px;">
-                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar. Setiap titik memiliki kode QR unik.
+                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar.
                     </p>
                     <div id="checkpoint-list" class="checkpoint-list"></div>
                 </div>
@@ -627,22 +641,29 @@
 
                     <hr style="margin: 30px 0; border: none; border-top: 2px solid #e9ecef;">
 
-                    <h3 style="color: #1e3c72;">Pembersihan Data</h3>
-                    <p style="color: #666; margin: 10px 0;">Data patroli lebih dari 30 hari akan otomatis terhapus.</p>
-                    <button class="btn btn-warning" onclick="cleanOldData()">🧹 Bersihkan Data Lama Sekarang</button>
-                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                    <h3 style="color: #1e3c72;">Informasi Sistem</h3>
+                    <p style="color: #666; margin: 10px 0;">
+                        ☁️ Data tersimpan di: <strong>Supabase Cloud (Singapore)</strong><br>
+                        🔄 Sinkronisasi: <strong>Real-time</strong><br>
+                        💾 Storage: <strong>500MB Gratis</strong>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ==================== SUPABASE CONFIG ====================
+        
+        const SUPABASE_URL = 'https://tqzjyvwxoenxaitzgeos.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxemp5dnd4b2VueGFpdHpnZW9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MTgzMzksImV4cCI6MjA2MTk5NDMzOX0.wB0tmYbJT-B2W8qK9jMasQ_I47EFXXl';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // ==================== CONFIGURATION ====================
         
-        const MAX_PATROL_RECORDS = 200; // Maksimal data yang disimpan
-        const DATA_RETENTION_DAYS = 30; // Auto-delete setelah 30 hari
-        const IMAGE_QUALITY = 0.6; // Kualitas kompresi foto (0.1-1.0)
-        const IMAGE_MAX_WIDTH = 800; // Maksimal lebar foto (pixel)
+        const IMAGE_QUALITY = 0.7;
+        const IMAGE_MAX_WIDTH = 800;
 
         let officers = [
             { name: "Agus Setiawan", nip: "199001011234567890" },
@@ -680,11 +701,11 @@
         let capturedPhotoData = '';
         let patrolData = [];
         let isLoggedIn = false;
-        let currentFilters = {};
 
-        // ==================== UTILITY FUNCTIONS ====================
+        // ==================== UTILITY ====================
 
-        function showLoading() {
+        function showLoading(text = 'Memproses...') {
+            document.querySelector('.loading-text').textContent = text;
             document.getElementById('loading-overlay').classList.remove('hidden');
         }
 
@@ -715,38 +736,75 @@
             });
         }
 
-        function calculateStorageSize() {
-            let totalSize = 0;
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    totalSize += localStorage[key].length + key.length;
-                }
+        // ==================== SUPABASE FUNCTIONS ====================
+
+        async function uploadPhotoToCloud(base64Data) {
+            try {
+                const fileName = `patrol_${Date.now()}.jpg`;
+                const base64Image = base64Data.split(',')[1];
+                const blob = await fetch(`data:image/jpeg;base64,${base64Image}`).then(r => r.blob());
+                
+                const { data, error } = await supabase.storage
+                    .from('patrol-photos')
+                    .upload(fileName, blob, {
+                        contentType: 'image/jpeg'
+                    });
+
+                if (error) throw error;
+
+                const { data: publicURL } = supabase.storage
+                    .from('patrol-photos')
+                    .getPublicUrl(fileName);
+
+                return publicURL.publicUrl;
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                throw error;
             }
-            return (totalSize / 1024 / 1024).toFixed(2); // Convert to MB
         }
 
-        function cleanOldData() {
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - DATA_RETENTION_DAYS);
-            
-            const before = patrolData.length;
-            patrolData = patrolData.filter(p => new Date(p.timestamp) > cutoffDate);
-            const removed = before - patrolData.length;
-            
-            saveData();
-            updateDashboard();
-            
-            if (removed > 0) {
-                showMessage(`${removed} data lama (>30 hari) berhasil dihapus`, 'success');
-            } else {
-                showMessage('Tidak ada data lama yang perlu dihapus', 'info');
+        async function savePatrolToCloud(officer, location, photoUrl) {
+            try {
+                const { data, error } = await supabase
+                    .from('patrols')
+                    .insert([
+                        {
+                            officer: officer,
+                            location: location,
+                            photo_url: photoUrl,
+                            timestamp: new Date().toISOString()
+                        }
+                    ]);
+
+                if (error) throw error;
+                return true;
+            } catch (error) {
+                console.error('Error saving patrol:', error);
+                throw error;
             }
         }
 
-        function limitDataSize() {
-            if (patrolData.length > MAX_PATROL_RECORDS) {
-                patrolData = patrolData.slice(-MAX_PATROL_RECORDS);
-                saveData();
+        async function loadPatrolsFromCloud() {
+            try {
+                const { data, error } = await supabase
+                    .from('patrols')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+                
+                patrolData = data.map(p => ({
+                    id: p.id,
+                    officer: p.officer,
+                    location: p.location,
+                    timestamp: p.timestamp,
+                    photo: p.photo_url
+                }));
+
+                return patrolData;
+            } catch (error) {
+                console.error('Error loading patrols:', error);
+                return [];
             }
         }
 
@@ -758,31 +816,13 @@
                 officers = JSON.parse(savedOfficers);
             }
             
-            const saved = localStorage.getItem('patrolData');
-            if (saved) {
-                patrolData = JSON.parse(saved);
-                cleanOldData(); // Auto-clean saat load
-            }
-            
             updateOfficerDropdown();
             updateOfficersList();
             updateCheckpointsList();
-            updateDashboard();
         }
 
-        function saveData() {
-            limitDataSize();
-            localStorage.setItem('patrolData', JSON.stringify(patrolData));
+        function saveOfficers() {
             localStorage.setItem('officers', JSON.stringify(officers));
-            updateStorageInfo();
-        }
-
-        function updateStorageInfo() {
-            const storageSize = calculateStorageSize();
-            const photoCount = patrolData.length;
-            
-            document.getElementById('storage-used').textContent = storageSize;
-            document.getElementById('total-photos').textContent = photoCount;
         }
 
         // ==================== OFFICER MANAGEMENT ====================
@@ -833,7 +873,7 @@
             }
             
             officers.push({ name, nip });
-            saveData();
+            saveOfficers();
             updateOfficerDropdown();
             updateOfficersList();
             cancelAddOfficer();
@@ -843,7 +883,7 @@
         function deleteOfficer(index) {
             if (confirm(`Hapus petugas ${officers[index].name}?`)) {
                 officers.splice(index, 1);
-                saveData();
+                saveOfficers();
                 updateOfficerDropdown();
                 updateOfficersList();
             }
@@ -888,7 +928,7 @@
                 document.getElementById('dashboard-locked').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
                 switchTab('dashboard');
-                updateDashboard();
+                refreshData();
             } else {
                 messageDiv.textContent = 'Username atau password salah!';
                 messageDiv.className = 'status-message status-error';
@@ -917,10 +957,7 @@
             html5QrCode = new Html5Qrcode("qr-reader");
             html5QrCode.start(
                 { facingMode: "environment" },
-                {
-                    fps: 5, // Reduced FPS for better performance
-                    qrbox: { width: 250, height: 250 }
-                },
+                { fps: 5, qrbox: { width: 250, height: 250 } },
                 onScanSuccess,
                 onScanError
             ).catch(err => {
@@ -961,11 +998,7 @@
             document.getElementById('camera-section').classList.remove('hidden');
             
             navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
                 audio: false 
             })
             .then(stream => {
@@ -979,7 +1012,7 @@
         }
 
         async function capturePhoto() {
-            showLoading();
+            showLoading('Mengambil foto...');
             
             const video = document.getElementById('camera-preview');
             const canvas = document.createElement('canvas');
@@ -996,10 +1029,10 @@
             img.style.display = 'block';
             
             hideLoading();
-            showMessage('Foto berhasil diambil dan dikompresi!', 'success');
+            showMessage('Foto berhasil diambil!', 'success');
         }
 
-        function savePatrolRecord() {
+        async function savePatrolRecord() {
             const officerName = document.getElementById('officer-name').value;
             
             if (!officerName) {
@@ -1012,26 +1045,25 @@
                 return;
             }
 
-            showLoading();
-
-            const record = {
-                id: Date.now(),
-                officer: officerName,
-                location: currentLocation,
-                timestamp: new Date().toISOString(),
-                photo: capturedPhotoData
-            };
-
-            patrolData.push(record);
-            saveData();
-            
-            hideLoading();
-            showMessage('Data patroli berhasil disimpan!', 'success');
-            
-            setTimeout(() => {
-                cancelCamera();
-                resetScanner();
-            }, 2000);
+            try {
+                showLoading('Mengupload foto ke cloud...');
+                
+                const photoUrl = await uploadPhotoToCloud(capturedPhotoData);
+                
+                showLoading('Menyimpan data patroli...');
+                await savePatrolToCloud(officerName, currentLocation, photoUrl);
+                
+                hideLoading();
+                showMessage('✅ Data patroli berhasil disimpan ke cloud!', 'success');
+                
+                setTimeout(() => {
+                    cancelCamera();
+                    resetScanner();
+                }, 2000);
+            } catch (error) {
+                hideLoading();
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
         }
 
         function cancelCamera() {
@@ -1077,11 +1109,27 @@
             }
             
             if (tab === 'dashboard' && isLoggedIn) {
-                updateDashboard();
+                refreshData();
             }
         }
 
         // ==================== DASHBOARD ====================
+
+        async function refreshData() {
+            if (!isLoggedIn) return;
+            
+            showLoading('Memuat data dari cloud...');
+            
+            try {
+                await loadPatrolsFromCloud();
+                updateDashboard();
+                hideLoading();
+                showMessage('Data berhasil di-refresh!', 'success');
+            } catch (error) {
+                hideLoading();
+                showMessage('Error loading data: ' + error.message, 'error');
+            }
+        }
 
         function updateDashboard() {
             if (!isLoggedIn) return;
@@ -1093,6 +1141,7 @@
             
             document.getElementById('total-patrols').textContent = todayPatrols.length;
             document.getElementById('total-all-patrols').textContent = patrolData.length;
+            document.getElementById('total-cloud-patrols').textContent = patrolData.length;
             
             const uniqueLocations = [...new Set(patrolData.map(p => p.location))];
             document.getElementById('total-locations').textContent = uniqueLocations.length;
@@ -1102,7 +1151,6 @@
 
             updateFilterOptions(uniqueLocations, uniqueOfficers);
             displayPatrolHistory(patrolData);
-            updateStorageInfo();
         }
 
         function updateFilterOptions(locations, officers) {
@@ -1131,7 +1179,7 @@
             container.innerHTML = '';
             const sorted = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            sorted.forEach((record, index) => {
+            sorted.forEach(record => {
                 const date = new Date(record.timestamp);
                 const div = document.createElement('div');
                 div.className = 'patrol-record';
@@ -1142,26 +1190,10 @@
                         dateStyle: 'full',
                         timeStyle: 'short'
                     })}</p>
-                    <img data-src="${record.photo}" alt="Foto Patroli" class="lazy" loading="lazy">
+                    <img src="${record.photo}" alt="Foto Patroli" loading="lazy">
                 `;
                 container.appendChild(div);
             });
-
-            // Lazy load images
-            const lazyImages = container.querySelectorAll('img.lazy');
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy');
-                        img.classList.add('loaded');
-                        observer.unobserve(img);
-                    }
-                });
-            });
-
-            lazyImages.forEach(img => imageObserver.observe(img));
         }
 
         function applyFilters() {
@@ -1185,13 +1217,12 @@
                 filtered = filtered.filter(p => p.officer === officer);
             }
             
-            currentFilters = { date, location, officer };
             displayPatrolHistory(filtered);
             showMessage(`Menampilkan ${filtered.length} data patroli`, 'info');
         }
 
         function exportToPDF() {
-            showLoading();
+            showLoading('Membuat PDF...');
             
             setTimeout(() => {
                 const { jsPDF } = window.jspdf;
@@ -1261,17 +1292,6 @@
             }, 100);
         }
 
-        function clearAllData() {
-            if (confirm('Apakah Anda yakin ingin menghapus SEMUA data patroli? Tindakan ini tidak dapat dibatalkan!')) {
-                if (confirm('Konfirmasi sekali lagi: HAPUS SEMUA DATA?')) {
-                    patrolData = [];
-                    saveData();
-                    updateDashboard();
-                    showMessage('Semua data patroli telah dihapus', 'info');
-                }
-            }
-        }
-
         function showMessage(message, type) {
             const messageDiv = document.getElementById('status-message');
             messageDiv.textContent = message;
@@ -1287,18 +1307,9 @@
 
         document.getElementById('filter-date').valueAsDate = new Date();
         
-        // Auto-cleanup on load
         window.addEventListener('load', () => {
             loadData();
             initScanner();
-        });
-
-        // Install PWA prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            console.log('PWA install available');
         });
     </script>
 </body>
