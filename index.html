@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="description" content="Sistem Monitoring Patroli Lapas Kelas IIA Banyuasin">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUGF0cm9sIE1vbml0b3JpbmciLCJzaG9ydF9uYW1lIjoiUGF0cm9sIiwiZGVzY3JpcHRpb24iOiJTaXN0ZW0gTW9uaXRvcmluZyBQYXRyb2xpIExhcGFzIiwidGhlbWVfY29sb3IiOiIjMWUzYzcyIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInN0YXJ0X3VybCI6Ii8iLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3RleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCclM0UlRjAlOUYlOUIlQTElM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
     <title>Sistem Monitoring Patroli - Lapas Kelas IIA Banyuasin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -236,6 +239,16 @@
             max-width: 100%;
             border-radius: 8px;
             margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .patrol-record img.lazy {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .patrol-record img.loaded {
+            opacity: 1;
         }
 
         .stats-grid {
@@ -335,10 +348,6 @@
             display: none !important;
         }
 
-        #scanner-section, #camera-section {
-            transition: all 0.3s ease;
-        }
-
         .user-info {
             background: #e3f2fd;
             padding: 10px 15px;
@@ -352,6 +361,46 @@
         .user-info span {
             color: #1e3c72;
             font-weight: 600;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3c72;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .storage-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .storage-info p {
+            margin: 5px 0;
+            color: #856404;
         }
 
         @media (max-width: 768px) {
@@ -376,7 +425,12 @@
 </head>
 <body>
     <div class="container">
-        <!-- LOGIN SCREEN FOR DASHBOARD -->
+        <!-- LOADING OVERLAY -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- LOGIN SCREEN -->
         <div id="login-screen" class="hidden">
             <div class="login-container">
                 <h2>🔐 Login Ka.KPLP</h2>
@@ -404,7 +458,7 @@
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('patrol')">📱 Patroli</button>
                 <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="switchTab('checkpoints')">📍 Titik Patroli</button>
+                <button class="tab-btn" onclick="switchTab('checkpoints')">📍 Titik</button>
                 <button class="tab-btn" onclick="switchTab('settings')">⚙️ Pengaturan</button>
             </div>
 
@@ -467,12 +521,18 @@
                         <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="logout()">Logout</button>
                     </div>
 
+                    <div class="storage-info">
+                        <p>📦 <strong>Storage:</strong> <span id="storage-used">0</span> MB digunakan</p>
+                        <p>📸 <strong>Total Foto:</strong> <span id="total-photos">0</span> foto tersimpan</p>
+                        <p>⏰ Data otomatis terhapus setelah 30 hari</p>
+                    </div>
+
                     <div class="card">
                         <h2>Statistik Real-Time</h2>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <h3 id="total-patrols">0</h3>
-                                <p>Total Patroli Hari Ini</p>
+                                <p>Patroli Hari Ini</p>
                             </div>
                             <div class="stat-card">
                                 <h3 id="total-locations">0</h3>
@@ -481,6 +541,10 @@
                             <div class="stat-card">
                                 <h3 id="total-officers">0</h3>
                                 <p>Petugas Aktif</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="total-all-patrols">0</h3>
+                                <p>Total Semua Patroli</p>
                             </div>
                         </div>
                     </div>
@@ -521,7 +585,7 @@
                 <div class="card">
                     <h2>📍 Daftar Titik Patroli</h2>
                     <p style="color: #666; margin-bottom: 20px;">
-                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar. Setiap titik memiliki kode QR unik yang harus dipindai saat patroli.
+                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar. Setiap titik memiliki kode QR unik.
                     </p>
                     <div id="checkpoint-list" class="checkpoint-list"></div>
                 </div>
@@ -529,12 +593,11 @@
                 <div class="card">
                     <h2>📄 Cara Membuat QR Code</h2>
                     <ol style="line-height: 2; color: #555;">
-                        <li>Buka website generator QR Code gratis: <a href="https://www.qr-code-generator.com/" target="_blank">QR Code Generator</a></li>
+                        <li>Buka: <a href="https://www.qr-code-generator.com/" target="_blank">QR Code Generator</a></li>
                         <li>Pilih tipe <strong>"Text"</strong></li>
-                        <li>Salin <strong>Kode QR</strong> dari daftar di atas (contoh: <code>TITIK-001</code>)</li>
-                        <li>Paste kode tersebut ke generator</li>
-                        <li>Download QR Code dalam format PNG atau PDF</li>
-                        <li>Cetak dan pasang di lokasi yang sesuai</li>
+                        <li>Salin kode dari daftar (contoh: <code>TITIK-001</code>)</li>
+                        <li>Paste ke generator</li>
+                        <li>Download dan cetak</li>
                     </ol>
                 </div>
             </div>
@@ -564,9 +627,10 @@
 
                     <hr style="margin: 30px 0; border: none; border-top: 2px solid #e9ecef;">
 
-                    <h3 style="color: #1e3c72;">Data & Reset</h3>
-                    <p style="color: #666; margin: 10px 0;">Hapus semua data patroli yang tersimpan. Tindakan ini tidak dapat dibatalkan!</p>
-                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data Patroli</button>
+                    <h3 style="color: #1e3c72;">Pembersihan Data</h3>
+                    <p style="color: #666; margin: 10px 0;">Data patroli lebih dari 30 hari akan otomatis terhapus.</p>
+                    <button class="btn btn-warning" onclick="cleanOldData()">🧹 Bersihkan Data Lama Sekarang</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
                 </div>
             </div>
         </div>
@@ -575,7 +639,11 @@
     <script>
         // ==================== CONFIGURATION ====================
         
-        // Default data petugas (bisa ditambah/edit via pengaturan)
+        const MAX_PATROL_RECORDS = 200; // Maksimal data yang disimpan
+        const DATA_RETENTION_DAYS = 30; // Auto-delete setelah 30 hari
+        const IMAGE_QUALITY = 0.6; // Kualitas kompresi foto (0.1-1.0)
+        const IMAGE_MAX_WIDTH = 800; // Maksimal lebar foto (pixel)
+
         let officers = [
             { name: "Agus Setiawan", nip: "199001011234567890" },
             { name: "Budi Hartono", nip: "199102021234567891" },
@@ -584,14 +652,13 @@
             { name: "Eko Prasetyo", nip: "199405051234567894" }
         ];
 
-        // Daftar titik patroli (bisa disesuaikan)
         const checkpoints = [
             { code: "TITIK-001", name: "Blok Hunian A - Lantai 1", description: "Area hunian napi risiko tinggi" },
             { code: "TITIK-002", name: "Blok Hunian A - Lantai 2", description: "Area hunian napi risiko tinggi" },
             { code: "TITIK-003", name: "Blok Hunian B - Lantai 1", description: "Area hunian napi risiko sedang" },
             { code: "TITIK-004", name: "Blok Hunian B - Lantai 2", description: "Area hunian napi risiko sedang" },
             { code: "TITIK-005", name: "Area Bengkel/Werkplaats", description: "Area kerja dengan peralatan" },
-            { code: "TITIK-006", name: "Dapur Umum", description: "Area dapur dan penyimpanan bahan makanan" },
+            { code: "TITIK-006", name: "Dapur Umum", description: "Area dapur dan penyimpanan bahan" },
             { code: "TITIK-007", name: "Ruang Besuk", description: "Area kunjungan keluarga" },
             { code: "TITIK-008", name: "Pos Penjagaan Utama", description: "Gerbang utama Lapas" },
             { code: "TITIK-009", name: "Tembok Keliling Timur", description: "Area keliling bagian timur" },
@@ -600,13 +667,12 @@
             { code: "TITIK-012", name: "Ruang Isolasi", description: "Area isolasi khusus" }
         ];
 
-        // Kredensial Ka.KPLP (bisa diubah)
         const supervisorCredentials = {
             username: "kakplp",
             password: "lapas2026"
         };
 
-        // ==================== STATE MANAGEMENT ====================
+        // ==================== STATE ====================
         
         let html5QrCode;
         let cameraStream;
@@ -614,8 +680,77 @@
         let capturedPhotoData = '';
         let patrolData = [];
         let isLoggedIn = false;
+        let currentFilters = {};
 
-        // ==================== INITIALIZATION ====================
+        // ==================== UTILITY FUNCTIONS ====================
+
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function compressImage(base64, maxWidth, quality) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = base64;
+            });
+        }
+
+        function calculateStorageSize() {
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalSize += localStorage[key].length + key.length;
+                }
+            }
+            return (totalSize / 1024 / 1024).toFixed(2); // Convert to MB
+        }
+
+        function cleanOldData() {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - DATA_RETENTION_DAYS);
+            
+            const before = patrolData.length;
+            patrolData = patrolData.filter(p => new Date(p.timestamp) > cutoffDate);
+            const removed = before - patrolData.length;
+            
+            saveData();
+            updateDashboard();
+            
+            if (removed > 0) {
+                showMessage(`${removed} data lama (>30 hari) berhasil dihapus`, 'success');
+            } else {
+                showMessage('Tidak ada data lama yang perlu dihapus', 'info');
+            }
+        }
+
+        function limitDataSize() {
+            if (patrolData.length > MAX_PATROL_RECORDS) {
+                patrolData = patrolData.slice(-MAX_PATROL_RECORDS);
+                saveData();
+            }
+        }
+
+        // ==================== DATA MANAGEMENT ====================
 
         function loadData() {
             const savedOfficers = localStorage.getItem('officers');
@@ -626,6 +761,7 @@
             const saved = localStorage.getItem('patrolData');
             if (saved) {
                 patrolData = JSON.parse(saved);
+                cleanOldData(); // Auto-clean saat load
             }
             
             updateOfficerDropdown();
@@ -635,8 +771,18 @@
         }
 
         function saveData() {
+            limitDataSize();
             localStorage.setItem('patrolData', JSON.stringify(patrolData));
             localStorage.setItem('officers', JSON.stringify(officers));
+            updateStorageInfo();
+        }
+
+        function updateStorageInfo() {
+            const storageSize = calculateStorageSize();
+            const photoCount = patrolData.length;
+            
+            document.getElementById('storage-used').textContent = storageSize;
+            document.getElementById('total-photos').textContent = photoCount;
         }
 
         // ==================== OFFICER MANAGEMENT ====================
@@ -691,7 +837,7 @@
             updateOfficerDropdown();
             updateOfficersList();
             cancelAddOfficer();
-            alert('Petugas berhasil ditambahkan!');
+            showMessage('Petugas berhasil ditambahkan!', 'success');
         }
 
         function deleteOfficer(index) {
@@ -716,7 +862,7 @@
             `).join('');
         }
 
-        // ==================== LOGIN SYSTEM ====================
+        // ==================== LOGIN ====================
 
         function showLogin() {
             document.getElementById('main-app').classList.add('hidden');
@@ -772,7 +918,7 @@
             html5QrCode.start(
                 { facingMode: "environment" },
                 {
-                    fps: 10,
+                    fps: 5, // Reduced FPS for better performance
                     qrbox: { width: 250, height: 250 }
                 },
                 onScanSuccess,
@@ -782,8 +928,7 @@
             });
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            // Check if scanned code is a valid checkpoint
+        function onScanSuccess(decodedText) {
             const checkpoint = checkpoints.find(cp => cp.code === decodedText);
             if (checkpoint) {
                 currentLocation = `${checkpoint.name} (${checkpoint.code})`;
@@ -799,11 +944,11 @@
         }
 
         function onScanError(errorMessage) {
-            // Ignore scan errors
+            // Ignore
         }
 
         function stopScanner() {
-            if (html5QrCode) {
+            if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
                     document.getElementById('scanner-section').classList.add('hidden');
                 }).catch(err => {
@@ -816,7 +961,11 @@
             document.getElementById('camera-section').classList.remove('hidden');
             
             navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" },
+                video: { 
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
                 audio: false 
             })
             .then(stream => {
@@ -829,7 +978,9 @@
             });
         }
 
-        function capturePhoto() {
+        async function capturePhoto() {
+            showLoading();
+            
             const video = document.getElementById('camera-preview');
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -837,13 +988,15 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0);
             
-            capturedPhotoData = canvas.toDataURL('image/jpeg', 0.8);
+            const rawPhoto = canvas.toDataURL('image/jpeg', 0.9);
+            capturedPhotoData = await compressImage(rawPhoto, IMAGE_MAX_WIDTH, IMAGE_QUALITY);
             
             const img = document.getElementById('captured-photo');
             img.src = capturedPhotoData;
             img.style.display = 'block';
             
-            showMessage('Foto berhasil diambil!', 'success');
+            hideLoading();
+            showMessage('Foto berhasil diambil dan dikompresi!', 'success');
         }
 
         function savePatrolRecord() {
@@ -859,6 +1012,8 @@
                 return;
             }
 
+            showLoading();
+
             const record = {
                 id: Date.now(),
                 officer: officerName,
@@ -870,6 +1025,7 @@
             patrolData.push(record);
             saveData();
             
+            hideLoading();
             showMessage('Data patroli berhasil disimpan!', 'success');
             
             setTimeout(() => {
@@ -891,13 +1047,12 @@
 
         function resetScanner() {
             document.getElementById('scanner-section').classList.remove('hidden');
-            initScanner();
+            setTimeout(() => initScanner(), 500);
         }
 
         // ==================== TAB SWITCHING ====================
 
         function switchTab(tab) {
-            // Stop scanner when leaving patrol tab
             if (tab !== 'patrol' && html5QrCode) {
                 stopScanner();
                 cancelCamera();
@@ -937,6 +1092,7 @@
             );
             
             document.getElementById('total-patrols').textContent = todayPatrols.length;
+            document.getElementById('total-all-patrols').textContent = patrolData.length;
             
             const uniqueLocations = [...new Set(patrolData.map(p => p.location))];
             document.getElementById('total-locations').textContent = uniqueLocations.length;
@@ -946,6 +1102,7 @@
 
             updateFilterOptions(uniqueLocations, uniqueOfficers);
             displayPatrolHistory(patrolData);
+            updateStorageInfo();
         }
 
         function updateFilterOptions(locations, officers) {
@@ -974,7 +1131,7 @@
             container.innerHTML = '';
             const sorted = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            sorted.forEach(record => {
+            sorted.forEach((record, index) => {
                 const date = new Date(record.timestamp);
                 const div = document.createElement('div');
                 div.className = 'patrol-record';
@@ -985,10 +1142,26 @@
                         dateStyle: 'full',
                         timeStyle: 'short'
                     })}</p>
-                    <img src="${record.photo}" alt="Foto Patroli">
+                    <img data-src="${record.photo}" alt="Foto Patroli" class="lazy" loading="lazy">
                 `;
                 container.appendChild(div);
             });
+
+            // Lazy load images
+            const lazyImages = container.querySelectorAll('img.lazy');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        img.classList.add('loaded');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            lazyImages.forEach(img => imageObserver.observe(img));
         }
 
         function applyFilters() {
@@ -1012,73 +1185,80 @@
                 filtered = filtered.filter(p => p.officer === officer);
             }
             
+            currentFilters = { date, location, officer };
             displayPatrolHistory(filtered);
             showMessage(`Menampilkan ${filtered.length} data patroli`, 'info');
         }
 
         function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            showLoading();
             
-            doc.setFontSize(16);
-            doc.text('LAPORAN PATROLI PENGAMANAN', 105, 15, { align: 'center' });
-            doc.setFontSize(12);
-            doc.text('Lapas Kelas IIA Banyuasin', 105, 22, { align: 'center' });
-            
-            doc.setFontSize(10);
-            const date = document.getElementById('filter-date').value;
-            const location = document.getElementById('filter-location').value;
-            const officer = document.getElementById('filter-officer').value;
-            
-            let filterText = 'Filter: ';
-            if (date) filterText += `Tanggal: ${date} | `;
-            if (location) filterText += `Lokasi: ${location} | `;
-            if (officer) filterText += `Petugas: ${officer}`;
-            if (!date && !location && !officer) filterText = 'Semua Data';
-            
-            doc.text(filterText, 15, 30);
-            
-            let filtered = [...patrolData];
-            if (date) {
-                filtered = filtered.filter(p => 
-                    new Date(p.timestamp).toDateString() === new Date(date).toDateString()
-                );
-            }
-            if (location) filtered = filtered.filter(p => p.location === location);
-            if (officer) filtered = filtered.filter(p => p.officer === officer);
-            
-            let y = 40;
-            doc.setFontSize(9);
-            
-            filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((record, index) => {
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(16);
+                doc.text('LAPORAN PATROLI PENGAMANAN', 105, 15, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text('Lapas Kelas IIA Banyuasin', 105, 22, { align: 'center' });
+                
+                doc.setFontSize(10);
+                const date = document.getElementById('filter-date').value;
+                const location = document.getElementById('filter-location').value;
+                const officer = document.getElementById('filter-officer').value;
+                
+                let filterText = 'Filter: ';
+                if (date) filterText += `Tanggal: ${date} | `;
+                if (location) filterText += `Lokasi: ${location} | `;
+                if (officer) filterText += `Petugas: ${officer}`;
+                if (!date && !location && !officer) filterText = 'Semua Data';
+                
+                doc.text(filterText, 15, 30);
+                
+                let filtered = [...patrolData];
+                if (date) {
+                    filtered = filtered.filter(p => 
+                        new Date(p.timestamp).toDateString() === new Date(date).toDateString()
+                    );
+                }
+                if (location) filtered = filtered.filter(p => p.location === location);
+                if (officer) filtered = filtered.filter(p => p.officer === officer);
+                
+                let y = 40;
+                doc.setFontSize(9);
+                
+                filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((record, index) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    const date = new Date(record.timestamp);
+                    
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${index + 1}. ${record.location}`, 15, y);
+                    y += 6;
+                    
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`Petugas: ${record.officer}`, 20, y);
+                    y += 5;
+                    doc.text(`Waktu: ${date.toLocaleString('id-ID')}`, 20, y);
+                    y += 10;
+                });
+                
+                const totalPages = doc.internal.pages.length - 1;
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.text(`Halaman ${i} dari ${totalPages}`, 105, 290, { align: 'center' });
+                    doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 15, 290);
                 }
                 
-                const date = new Date(record.timestamp);
+                doc.save(`Laporan_Patroli_${new Date().toISOString().split('T')[0]}.pdf`);
                 
-                doc.setFont(undefined, 'bold');
-                doc.text(`${index + 1}. ${record.location}`, 15, y);
-                y += 6;
-                
-                doc.setFont(undefined, 'normal');
-                doc.text(`Petugas: ${record.officer}`, 20, y);
-                y += 5;
-                doc.text(`Waktu: ${date.toLocaleString('id-ID')}`, 20, y);
-                y += 10;
-            });
-            
-            const totalPages = doc.internal.pages.length - 1;
-            for (let i = 1; i <= totalPages; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.text(`Halaman ${i} dari ${totalPages}`, 105, 290, { align: 'center' });
-                doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 15, 290);
-            }
-            
-            doc.save(`Laporan_Patroli_${new Date().toISOString().split('T')[0]}.pdf`);
-            showMessage('PDF berhasil didownload!', 'success');
+                hideLoading();
+                showMessage('PDF berhasil didownload!', 'success');
+            }, 100);
         }
 
         function clearAllData() {
@@ -1106,8 +1286,20 @@
         // ==================== INITIALIZATION ====================
 
         document.getElementById('filter-date').valueAsDate = new Date();
-        loadData();
-        initScanner();
+        
+        // Auto-cleanup on load
+        window.addEventListener('load', () => {
+            loadData();
+            initScanner();
+        });
+
+        // Install PWA prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('PWA install available');
+        });
     </script>
 </body>
 </html>
