@@ -1,1316 +1,913 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1e3c72">
-    <title>Sistem Monitoring Patroli - Lapas Kelas IIA Banyuasin</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .header h1 {
-            color: #1e3c72;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .connection-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
-        .status-online {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-offline {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            background: white;
-            color: #1e3c72;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .tab-btn.active {
-            background: #1e3c72;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            color: #1e3c72;
-            margin-bottom: 20px;
-            font-size: 20px;
-            border-bottom: 2px solid #1e3c72;
-            padding-bottom: 10px;
-        }
-
-        #qr-reader {
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        #camera-preview {
-            width: 100%;
-            max-width: 500px;
-            border-radius: 10px;
-            margin: 20px auto;
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #1e3c72;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        .btn-primary {
-            background: #1e3c72;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2a5298;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .status-message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            display: none;
-        }
-
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .status-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .patrol-record {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #1e3c72;
-        }
-
-        .patrol-record h3 {
-            color: #1e3c72;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .patrol-record p {
-            margin: 5px 0;
-            color: #555;
-        }
-
-        .patrol-record img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-
-        .stat-card p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .filter-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        #captured-photo {
-            max-width: 100%;
-            border-radius: 10px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .photo-preview {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .login-container h2 {
-            text-align: center;
-            color: #1e3c72;
-            margin-bottom: 20px;
-        }
-
-        .checkpoint-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .checkpoint-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #1e3c72;
-        }
-
-        .checkpoint-card h3 {
-            color: #1e3c72;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        .checkpoint-card p {
-            color: #666;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-
-        .checkpoint-card code {
-            background: #e9ecef;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #495057;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .user-info {
-            background: #e3f2fd;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-info span {
-            color: #1e3c72;
-            font-weight: 600;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1e3c72;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            color: white;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .cloud-info {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .cloud-info p {
-            margin: 5px 0;
-            color: #0c5460;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 20px;
-            }
-            
-            .tab-btn {
-                padding: 12px;
-                font-size: 14px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .checkpoint-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Patroli Lapas Banyuasin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#1e3c72;min-height:100vh;padding:8px;color:#333}
+.wrap{max-width:1100px;margin:0 auto}
+.hdr{background:#fff;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center}
+.hdr h1{color:#1e3c72;font-size:18px}
+.hdr p{color:#666;font-size:12px;margin-top:3px}
+.tabs{display:flex;gap:4px;margin-bottom:10px}
+.tab{flex:1;padding:10px 4px;border:0;background:#fff;color:#1e3c72;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer}
+.tab.on{background:#1e3c72;color:#fff}
+.pg{display:none}
+.pg.on{display:block}
+.box{background:#fff;padding:12px;border-radius:8px;margin-bottom:10px}
+.box h2{color:#1e3c72;font-size:16px;border-bottom:2px solid #1e3c72;padding-bottom:6px;margin-bottom:12px}
+#reader{border-radius:6px;overflow:hidden;margin-bottom:10px;min-height:240px;background:#000}
+#vid{width:100%;max-width:360px;border-radius:6px;margin:8px auto;display:block;background:#000}
+.fg{margin-bottom:10px}
+.fg label{display:block;margin-bottom:4px;font-weight:600;font-size:13px}
+.fg input,.fg select{width:100%;padding:9px;border:2px solid #ddd;border-radius:5px;font-size:15px}
+.btn{padding:10px 16px;border:0;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;margin:3px;min-height:42px;-webkit-user-select:none;user-select:none;transition:opacity .15s}
+.btn:active{opacity:0.6}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.bp{background:#1e3c72;color:#fff}
+.bs{background:#28a745;color:#fff}
+.bd{background:#dc3545;color:#fff}
+.bw{background:#ffc107;color:#000}
+.msg{padding:10px;border-radius:5px;margin-bottom:10px;display:none;font-size:13px}
+.ms{background:#d4edda;color:#155724}
+.me{background:#f8d7da;color:#721c24}
+.mi{background:#d1ecf1;color:#0c5460}
+.rec{background:#f8f9fa;padding:10px;border-radius:5px;margin-bottom:8px;border-left:3px solid #1e3c72}
+.rec h3{color:#1e3c72;font-size:14px;margin-bottom:5px}
+.rec p{margin:2px 0;color:#555;font-size:12px}
+.rec img{max-width:100%;border-radius:5px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:10px}
+.stat{background:#1e3c72;color:#fff;padding:10px;border-radius:6px;text-align:center}
+.stat h3{font-size:22px}
+.stat p{font-size:11px;margin-top:2px}
+.flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px}
+#photo{max-width:100%;border-radius:5px;margin-top:8px;display:none}
+.lgn{max-width:340px;margin:30px auto;background:#fff;padding:18px;border-radius:8px}
+.lgn h2{text-align:center;color:#1e3c72;margin-bottom:12px}
+.cps{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.cp{background:#f8f9fa;padding:8px;border-radius:5px;border-left:3px solid #1e3c72}
+.cp h3{color:#1e3c72;font-size:13px;margin-bottom:3px}
+.cp p{color:#666;font-size:11px}
+.cp code{background:#e9ecef;padding:2px 4px;border-radius:3px;font-size:11px}
+.hide{display:none!important}
+.usr{background:#e3f2fd;padding:8px;border-radius:5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.usr span{color:#1e3c72;font-weight:600;font-size:13px}
+.spn{display:inline-block;width:12px;height:12px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:s 0.7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes s{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:#999;padding:20px;font-size:13px}
+hr{border:0;border-top:2px solid #e9ecef;margin:15px 0}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- LOADING OVERLAY -->
-        <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <div class="loading-text">Memproses...</div>
-        </div>
+<div class="wrap">
 
-        <!-- LOGIN SCREEN -->
-        <div id="login-screen" class="hidden">
-            <div class="login-container">
-                <h2>🔐 Login Ka.KPLP</h2>
-                <div id="login-message" class="status-message"></div>
-                <div class="form-group">
-                    <label>Username:</label>
-                    <input type="text" id="login-username" placeholder="Masukkan username">
-                </div>
-                <div class="form-group">
-                    <label>Password:</label>
-                    <input type="password" id="login-password" placeholder="Masukkan password">
-                </div>
-                <button class="btn btn-primary" style="width: 100%;" onclick="attemptLogin()">Login</button>
-                <button class="btn btn-warning" style="width: 100%; margin-top: 10px;" onclick="cancelLogin()">Kembali</button>
-            </div>
-        </div>
+<!-- LOGIN -->
+<div id="login" class="hide">
+<div class="lgn">
+<h2>🔐 Login Ka.KPLP</h2>
+<div id="lmsg" class="msg"></div>
+<div class="fg"><label>Username:</label><input id="u" type="text"></div>
+<div class="fg"><label>Password:</label><input id="p" type="password"></div>
+<button class="btn bp" style="width:100%" onclick="doLogin()">Login</button>
+<button class="btn bw" style="width:100%;margin-top:6px" onclick="cancelLogin()">Kembali</button>
+</div>
+</div>
 
-        <!-- MAIN APP -->
-        <div id="main-app">
-            <div class="header">
-                <h1>🛡️ Sistem Monitoring Patroli (Cloud)</h1>
-                <p>Lapas Kelas IIA Banyuasin - Bidang Pengamanan</p>
-                <span id="connection-status" class="connection-status status-online">🟢 Online - Tersimpan di Cloud</span>
-            </div>
+<!-- MAIN -->
+<div id="main">
+<div class="hdr">
+<h1>🛡️ Sistem Patroli</h1>
+<p>Lapas Kelas IIA Banyuasin</p>
+</div>
 
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('patrol')">📱 Patroli</button>
-                <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="switchTab('checkpoints')">📍 Titik</button>
-                <button class="tab-btn" onclick="switchTab('settings')">⚙️ Pengaturan</button>
-            </div>
+<div class="tabs">
+<button class="tab on" onclick="tab('p')">📱 Patroli</button>
+<button class="tab" onclick="tab('d')">📊 Dashboard</button>
+<button class="tab" onclick="tab('c')">📍 Titik</button>
+<button class="tab" onclick="tab('s')">⚙️ Setting</button>
+</div>
 
-            <!-- TAB PATROLI -->
-            <div id="patrol-tab" class="tab-content active">
-                <div class="card">
-                    <h2>Scan QR Code Lokasi</h2>
-                    <div id="status-message" class="status-message"></div>
-                    
-                    <div id="scanner-section">
-                        <div id="qr-reader"></div>
-                        <button class="btn btn-danger" onclick="stopScanner()">Hentikan Scanner</button>
-                    </div>
+<!-- PATROLI -->
+<div id="tab-p" class="pg on">
+<div class="box">
+<h2>Scan QR Code</h2>
+<div id="msg" class="msg"></div>
 
-                    <div id="camera-section" class="hidden">
-                        <div class="form-group">
-                            <label>Pilih Petugas:</label>
-                            <select id="officer-name">
-                                <option value="">-- Pilih Petugas --</option>
-                            </select>
-                        </div>
+<div id="scan-sec">
+<div id="reader"></div>
+<button class="btn bd" onclick="stopScan()">Stop Scanner</button>
+</div>
 
-                        <div class="form-group">
-                            <label>Lokasi yang Terdeteksi:</label>
-                            <input type="text" id="location-detected" readonly>
-                        </div>
+<div id="cam-sec" class="hide">
+<div class="fg">
+<label>Petugas:</label>
+<select id="off"><option value="">-- Pilih Petugas --</option></select>
+</div>
+<div class="fg">
+<label>Lokasi:</label>
+<input id="loc" readonly>
+</div>
+<p style="font-weight:600;margin-bottom:6px;font-size:13px">Foto:</p>
+<video id="vid" autoplay playsinline muted></video>
+<div style="text-align:center"><img id="photo"></div>
+<div style="margin-top:12px">
+<button class="btn bp" id="btn-photo" onclick="takePhoto()">📸 Foto</button>
+<button class="btn bs" id="btn-save" onclick="savePat()">💾 Simpan</button>
+<button class="btn bd" onclick="cancelCam()">❌ Batal</button>
+</div>
+</div>
+</div>
+</div>
 
-                        <p><strong>Ambil Foto Lokasi:</strong></p>
-                        <video id="camera-preview" autoplay playsinline></video>
-                        
-                        <div class="photo-preview">
-                            <img id="captured-photo" />
-                        </div>
+<!-- DASHBOARD -->
+<div id="tab-d" class="pg">
+<div id="lock" class="box">
+<h2>🔒 Akses Terbatas</h2>
+<p class="empty">Dashboard hanya untuk Ka.KPLP</p>
+<div style="text-align:center"><button class="btn bp" onclick="showLogin()">🔐 Login</button></div>
+</div>
 
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="capturePhoto()">📸 Ambil Foto</button>
-                            <button class="btn btn-success" onclick="savePatrolRecord()">💾 Simpan ke Cloud</button>
-                            <button class="btn btn-danger" onclick="cancelCamera()">❌ Batal</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div id="dash" class="hide">
+<div class="usr">
+<span>👤 <strong>Ka.KPLP</strong></span>
+<button class="btn bd" style="padding:6px 12px;margin:0;min-height:32px" onclick="logout()">Logout</button>
+</div>
 
-            <!-- TAB DASHBOARD -->
-            <div id="dashboard-tab" class="tab-content">
-                <div id="dashboard-locked" class="card">
-                    <h2>🔒 Akses Terbatas</h2>
-                    <p style="text-align: center; padding: 30px;">
-                        Dashboard hanya bisa diakses oleh Ka.KPLP.<br>
-                        Silakan login terlebih dahulu.
-                    </p>
-                    <div style="text-align: center;">
-                        <button class="btn btn-primary" onclick="showLogin()">🔐 Login sebagai Ka.KPLP</button>
-                    </div>
-                </div>
+<div class="box">
+<h2>Statistik</h2>
+<div class="stats">
+<div class="stat"><h3 id="t1">0</h3><p>Hari Ini</p></div>
+<div class="stat"><h3 id="t2">0</h3><p>Lokasi</p></div>
+<div class="stat"><h3 id="t3">0</h3><p>Petugas</p></div>
+<div class="stat"><h3 id="t4">0</h3><p>Total</p></div>
+</div>
+</div>
 
-                <div id="dashboard-content" class="hidden">
-                    <div class="user-info">
-                        <span>👤 Login sebagai: <strong id="logged-user"></strong></span>
-                        <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="logout()">Logout</button>
-                    </div>
+<div class="box">
+<h2>Filter</h2>
+<div class="flt">
+<div class="fg"><label>Tanggal:</label><input id="fd" type="date"></div>
+<div class="fg"><label>Lokasi:</label><select id="fl"><option value="">Semua</option></select></div>
+<div class="fg"><label>Petugas:</label><select id="fo"><option value="">Semua</option></select></div>
+</div>
+<button class="btn bp" onclick="filter()">🔍 Filter</button>
+<button class="btn bs" id="btn-pdf" onclick="exportPDF()">📄 Export PDF</button>
+</div>
 
-                    <div class="cloud-info">
-                        <p>☁️ <strong>Status:</strong> Terhubung ke Supabase Cloud</p>
-                        <p>📊 <strong>Total Patroli:</strong> <span id="total-cloud-patrols">0</span> data tersimpan</p>
-                        <p>🔄 Data otomatis tersimpan dan tersinkronisasi ke semua perangkat</p>
-                    </div>
+<div class="box">
+<h2>Riwayat (<span id="rcnt">0</span>)</h2>
+<div id="hist"></div>
+<div style="text-align:center;margin-top:12px">
+<button class="btn bp hide" id="more" onclick="loadMore()">Tampilkan Lebih Banyak</button>
+</div>
+</div>
+</div>
+</div>
 
-                    <div class="card">
-                        <h2>Statistik Real-Time</h2>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <h3 id="total-patrols">0</h3>
-                                <p>Patroli Hari Ini</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="total-locations">0</h3>
-                                <p>Lokasi Tercatat</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="total-officers">0</h3>
-                                <p>Petugas Aktif</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="total-all-patrols">0</h3>
-                                <p>Total Semua Patroli</p>
-                            </div>
-                        </div>
-                    </div>
+<!-- TITIK -->
+<div id="tab-c" class="pg">
+<div class="box">
+<h2>📍 Titik Patroli</h2>
+<div id="cps" class="cps"></div>
+</div>
+<div class="box">
+<h2>📄 Buat QR Code</h2>
+<ol style="line-height:1.8;color:#555;font-size:13px;padding-left:20px">
+<li>Buka <a href="https://www.qr-code-generator.com/" target="_blank" style="color:#1e3c72">qr-code-generator.com</a></li>
+<li>Pilih tipe "Text"</li>
+<li>Ketik kode (contoh: TITIK-001)</li>
+<li>Download dan cetak</li>
+</ol>
+</div>
+</div>
 
-                    <div class="card">
-                        <h2>Filter Laporan</h2>
-                        <div class="filter-section">
-                            <div class="form-group">
-                                <label>Tanggal:</label>
-                                <input type="date" id="filter-date">
-                            </div>
-                            <div class="form-group">
-                                <label>Lokasi:</label>
-                                <select id="filter-location">
-                                    <option value="">Semua Lokasi</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Petugas:</label>
-                                <select id="filter-officer">
-                                    <option value="">Semua Petugas</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="applyFilters()">🔍 Terapkan Filter</button>
-                        <button class="btn btn-success" onclick="exportToPDF()">📄 Export PDF</button>
-                        <button class="btn btn-warning" onclick="refreshData()">🔄 Refresh Data</button>
-                    </div>
+<!-- SETTING -->
+<div id="tab-s" class="pg">
+<div class="box">
+<h2>⚙️ Petugas</h2>
+<div id="off-list" style="margin:10px 0"></div>
+<button class="btn bp" onclick="addOff()">➕ Tambah Petugas</button>
 
-                    <div class="card">
-                        <h2>Riwayat Patroli</h2>
-                        <div id="patrol-history"></div>
-                    </div>
-                </div>
-            </div>
+<div id="add-form" class="hide" style="margin-top:12px;padding:12px;background:#f8f9fa;border-radius:5px">
+<div class="fg"><label>Nama:</label><input id="nn"></div>
+<div class="fg"><label>NIP:</label><input id="np"></div>
+<button class="btn bs" onclick="saveOff()">💾 Simpan</button>
+<button class="btn bd" onclick="cancelOff()">❌ Batal</button>
+</div>
 
-            <!-- TAB TITIK PATROLI -->
-            <div id="checkpoints-tab" class="tab-content">
-                <div class="card">
-                    <h2>📍 Daftar Titik Patroli</h2>
-                    <p style="color: #666; margin-bottom: 20px;">
-                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar.
-                    </p>
-                    <div id="checkpoint-list" class="checkpoint-list"></div>
-                </div>
+<hr>
 
-                <div class="card">
-                    <h2>📄 Cara Membuat QR Code</h2>
-                    <ol style="line-height: 2; color: #555;">
-                        <li>Buka: <a href="https://www.qr-code-generator.com/" target="_blank">QR Code Generator</a></li>
-                        <li>Pilih tipe <strong>"Text"</strong></li>
-                        <li>Salin kode dari daftar (contoh: <code>TITIK-001</code>)</li>
-                        <li>Paste ke generator</li>
-                        <li>Download dan cetak</li>
-                    </ol>
-                </div>
-            </div>
+<h3 style="color:#1e3c72;font-size:14px;margin-bottom:8px">Data Storage</h3>
+<p style="color:#666;font-size:12px;margin:6px 0">Auto-delete data lebih dari 30 hari</p>
+<p style="color:#666;font-size:12px;margin:6px 0">Storage: <strong id="size">0</strong> | Records: <strong id="cnt">0</strong> / 100</p>
+<button class="btn bw" onclick="cleanOld()">🧹 Hapus Data Lama</button>
+<button class="btn bd" onclick="clearAll()">🗑️ Hapus Semua</button>
 
-            <!-- TAB PENGATURAN -->
-            <div id="settings-tab" class="tab-content">
-                <div class="card">
-                    <h2>⚙️ Pengaturan Sistem</h2>
-                    
-                    <h3 style="color: #1e3c72; margin-top: 20px;">Daftar Petugas</h3>
-                    <div id="officers-list" style="margin: 15px 0;"></div>
-                    <button class="btn btn-primary" onclick="showAddOfficer()">➕ Tambah Petugas</button>
+<hr>
 
-                    <div id="add-officer-form" class="hidden" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                        <h4>Tambah Petugas Baru</h4>
-                        <div class="form-group">
-                            <label>Nama Lengkap:</label>
-                            <input type="text" id="new-officer-name" placeholder="Contoh: Budi Santoso">
-                        </div>
-                        <div class="form-group">
-                            <label>NIP:</label>
-                            <input type="text" id="new-officer-nip" placeholder="Contoh: 199012345678901234">
-                        </div>
-                        <button class="btn btn-success" onclick="addOfficer()">💾 Simpan</button>
-                        <button class="btn btn-danger" onclick="cancelAddOfficer()">❌ Batal</button>
-                    </div>
+<h3 style="color:#1e3c72;font-size:14px;margin-bottom:8px">Export/Import Data</h3>
+<p style="color:#666;font-size:12px;margin:6px 0">Backup data atau pindahkan ke HP lain</p>
+<button class="btn bp" onclick="exportData()">📥 Export Data (Backup)</button>
+<button class="btn bs" onclick="document.getElementById('imp').click()">📤 Import Data</button>
+<input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+</div>
 
-                    <hr style="margin: 30px 0; border: none; border-top: 2px solid #e9ecef;">
+</div>
+</div>
 
-                    <h3 style="color: #1e3c72;">Informasi Sistem</h3>
-                    <p style="color: #666; margin: 10px 0;">
-                        ☁️ Data tersimpan di: <strong>Supabase Cloud (Singapore)</strong><br>
-                        🔄 Sinkronisasi: <strong>Real-time</strong><br>
-                        💾 Storage: <strong>500MB Gratis</strong>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
+<script>
+// ===== CONFIG =====
+const MAX_REC = 100;
+const RETENTION = 30;
+const QUALITY = 0.5;
+const MAX_W = 600;
+const PAGE = 8;
 
-    <script>
-        // ==================== SUPABASE CONFIG ====================
+// ===== DEFAULT DATA =====
+let officers = [
+{name:"Agus Setiawan",nip:"199001011234567890"},
+{name:"Budi Hartono",nip:"199102021234567891"},
+{name:"Candra Wijaya",nip:"199203031234567892"},
+{name:"Dedi Kusuma",nip:"199304041234567893"},
+{name:"Eko Prasetyo",nip:"199405051234567894"}
+];
+
+const checkpoints = [
+{code:"TITIK-001",name:"Blok A Lt.1",description:"Hunian risiko tinggi"},
+{code:"TITIK-002",name:"Blok A Lt.2",description:"Hunian risiko tinggi"},
+{code:"TITIK-003",name:"Blok B Lt.1",description:"Hunian risiko sedang"},
+{code:"TITIK-004",name:"Blok B Lt.2",description:"Hunian risiko sedang"},
+{code:"TITIK-005",name:"Bengkel",description:"Area kerja"},
+{code:"TITIK-006",name:"Dapur",description:"Dapur umum"},
+{code:"TITIK-007",name:"R.Besuk",description:"Area kunjungan"},
+{code:"TITIK-008",name:"Pos Utama",description:"Gerbang utama"},
+{code:"TITIK-009",name:"Tembok Timur",description:"Keliling timur"},
+{code:"TITIK-010",name:"Tembok Barat",description:"Keliling barat"},
+{code:"TITIK-011",name:"Lapangan",description:"Olahraga"},
+{code:"TITIK-012",name:"Isolasi",description:"Sel isolasi"}
+];
+
+const CRED = {username:"kakplp",password:"lapas2026"};
+
+// ===== STATE =====
+let qr = null;
+let stream = null;
+let curLoc = '';
+let photoData = '';
+let data = [];
+let logged = false;
+let displayed = PAGE;
+let curFilter = null;
+let isProcessing = false;
+let qrLibLoaded = false;
+let pdfLibLoaded = false;
+
+// ===== UTILITY =====
+function $(id){return document.getElementById(id)}
+
+function msg(text, type){
+  const m = $('msg');
+  m.textContent = text;
+  m.className = 'msg m'+type;
+  m.style.display = 'block';
+  setTimeout(()=>m.style.display='none', 2500);
+}
+
+function setBtnLoading(btnId, isLoading){
+  const btn = $(btnId);
+  if(!btn) return;
+  if(isLoading){
+    btn.disabled = true;
+    btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spn"></span>...';
+  } else {
+    btn.disabled = false;
+    if(btn.dataset.orig) btn.innerHTML = btn.dataset.orig;
+  }
+}
+
+function getSize(){
+  let t = 0;
+  for(let k in localStorage){
+    if(localStorage.hasOwnProperty(k)) t += localStorage[k].length + k.length;
+  }
+  if(t < 1024) return t+' B';
+  if(t < 1024*1024) return (t/1024).toFixed(1)+' KB';
+  return (t/1024/1024).toFixed(2)+' MB';
+}
+
+function compress(b64, maxW, q){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if(w > maxW){ h = h*maxW/w; w = maxW; }
+      canvas.width = w; 
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', q));
+    };
+    img.src = b64;
+  });
+}
+
+// ===== LIBRARY LOADER (Lazy) =====
+function loadQRLib(){
+  return new Promise((resolve, reject) => {
+    if(qrLibLoaded || typeof Html5Qrcode !== 'undefined'){
+      qrLibLoaded = true;
+      resolve();
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+    s.onload = () => { qrLibLoaded = true; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function loadPDFLib(){
+  return new Promise((resolve, reject) => {
+    if(pdfLibLoaded || (window.jspdf && window.jspdf.jsPDF)){
+      pdfLibLoaded = true;
+      resolve();
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => { pdfLibLoaded = true; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ===== DATA MANAGEMENT =====
+function load(){
+  try {
+    const o = localStorage.getItem('officers');
+    if(o) officers = JSON.parse(o);
+    
+    const d = localStorage.getItem('patrolData');
+    if(d){
+      data = JSON.parse(d);
+      cleanOld(true);
+    }
+  } catch(e){
+    console.error('Load error:', e);
+  }
+  
+  fillOffSel();
+  showOffList();
+  showCps();
+}
+
+function save(){
+  try {
+    if(data.length > MAX_REC) data = data.slice(-MAX_REC);
+    localStorage.setItem('patrolData', JSON.stringify(data));
+    localStorage.setItem('officers', JSON.stringify(officers));
+  } catch(e){
+    msg('Storage penuh! Hapus data lama.', 'e');
+  }
+}
+
+// ===== OFFICERS =====
+function fillOffSel(){
+  const s = $('off');
+  s.innerHTML = '<option value="">-- Pilih Petugas --</option>';
+  officers.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.name;
+    opt.textContent = o.name;
+    s.appendChild(opt);
+  });
+}
+
+function showOffList(){
+  const c = $('off-list');
+  if(!officers.length){
+    c.innerHTML = '<p class="empty">Belum ada petugas</p>';
+    return;
+  }
+  c.innerHTML = officers.map((o,i) => 
+    `<div style="background:#f8f9fa;padding:8px 10px;border-radius:5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+      <div><strong style="font-size:13px">${o.name}</strong><br><small style="color:#666;font-size:11px">${o.nip}</small></div>
+      <button class="btn bd" style="padding:6px 10px;margin:0;min-height:32px" onclick="delOff(${i})">🗑️</button>
+    </div>`
+  ).join('');
+}
+
+function showCps(){
+  $('cps').innerHTML = checkpoints.map(c => 
+    `<div class="cp">
+      <h3>${c.name}</h3>
+      <p>${c.description}</p>
+      <p style="margin-top:4px"><code>${c.code}</code></p>
+    </div>`
+  ).join('');
+}
+
+function addOff(){ $('add-form').classList.remove('hide'); }
+function cancelOff(){
+  $('add-form').classList.add('hide');
+  $('nn').value = '';
+  $('np').value = '';
+}
+
+function saveOff(){
+  const n = $('nn').value.trim();
+  const p = $('np').value.trim();
+  if(!n || !p){ alert('Nama dan NIP harus diisi'); return; }
+  officers.push({name:n, nip:p});
+  save();
+  fillOffSel();
+  showOffList();
+  cancelOff();
+}
+
+function delOff(i){
+  if(confirm(`Hapus ${officers[i].name}?`)){
+    officers.splice(i, 1);
+    save();
+    fillOffSel();
+    showOffList();
+  }
+}
+
+// ===== LOGIN =====
+function showLogin(){
+  $('main').classList.add('hide');
+  $('login').classList.remove('hide');
+}
+
+function cancelLogin(){
+  $('login').classList.add('hide');
+  $('main').classList.remove('hide');
+  tab('p');
+}
+
+function doLogin(){
+  const u = $('u').value.trim();
+  const p = $('p').value.trim();
+  if(u === CRED.username && p === CRED.password){
+    logged = true;
+    $('login').classList.add('hide');
+    $('main').classList.remove('hide');
+    $('lock').classList.add('hide');
+    $('dash').classList.remove('hide');
+    tab('d');
+  } else {
+    const m = $('lmsg');
+    m.textContent = 'Username/password salah';
+    m.className = 'msg me';
+    m.style.display = 'block';
+    setTimeout(()=>m.style.display='none', 2500);
+  }
+  $('u').value = '';
+  $('p').value = '';
+}
+
+function logout(){
+  if(confirm('Logout?')){
+    logged = false;
+    $('lock').classList.remove('hide');
+    $('dash').classList.add('hide');
+    tab('p');
+  }
+}
+
+// ===== QR SCANNER =====
+async function startScan(){
+  if(qr && qr.isScanning) return;
+  
+  try {
+    await loadQRLib();
+    if(qr) {
+      try { await qr.stop(); } catch(e) {}
+      qr = null;
+    }
+    qr = new Html5Qrcode("reader");
+    await qr.start(
+      {facingMode:"environment"},
+      {fps:5, qrbox:{width:200,height:200}, aspectRatio:1},
+      onScanSuccess,
+      ()=>{}
+    );
+  } catch(e){
+    console.error('Scanner error:', e);
+    msg('Scanner tidak bisa start', 'e');
+  }
+}
+
+function onScanSuccess(text){
+  const cp = checkpoints.find(c => c.code === text);
+  curLoc = cp ? `${cp.name} (${cp.code})` : text;
+  $('loc').value = curLoc;
+  msg('QR: '+curLoc, 's');
+  stopScan();
+  showCam();
+}
+
+async function stopScan(){
+  if(qr && qr.isScanning){
+    try {
+      await qr.stop();
+      $('scan-sec').classList.add('hide');
+    } catch(e) { console.log(e); }
+  }
+}
+
+async function showCam(){
+  $('cam-sec').classList.remove('hide');
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {facingMode:"environment", width:{ideal:800}, height:{ideal:600}},
+      audio: false
+    });
+    $('vid').srcObject = stream;
+  } catch(e){
+    msg('Gagal akses kamera', 'e');
+  }
+}
+
+async function takePhoto(){
+  if(isProcessing) return;
+  isProcessing = true;
+  setBtnLoading('btn-photo', true);
+  
+  try {
+    const v = $('vid');
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0);
+    const raw = c.toDataURL('image/jpeg', 0.8);
+    photoData = await compress(raw, MAX_W, QUALITY);
+    
+    const img = $('photo');
+    img.src = photoData;
+    img.style.display = 'block';
+    msg('Foto siap', 's');
+  } catch(e){
+    msg('Gagal ambil foto', 'e');
+  } finally {
+    setBtnLoading('btn-photo', false);
+    isProcessing = false;
+  }
+}
+
+async function savePat(){
+  if(isProcessing) return;
+  
+  const off = $('off').value;
+  if(!off){ msg('Pilih petugas dulu', 'e'); return; }
+  if(!photoData){ msg('Foto dulu', 'e'); return; }
+  
+  isProcessing = true;
+  setBtnLoading('btn-save', true);
+  
+  // Use setTimeout to prevent UI freeze
+  await new Promise(r => setTimeout(r, 50));
+  
+  try {
+    data.push({
+      id: Date.now(),
+      officer: off,
+      location: curLoc,
+      timestamp: new Date().toISOString(),
+      photo: photoData
+    });
+    
+    save();
+    msg('Tersimpan!', 's');
+    
+    setTimeout(() => {
+      cancelCam();
+      resetScan();
+    }, 1000);
+  } catch(e){
+    msg('Error: '+e.message, 'e');
+  } finally {
+    setBtnLoading('btn-save', false);
+    isProcessing = false;
+  }
+}
+
+function cancelCam(){
+  if(stream){
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  $('cam-sec').classList.add('hide');
+  $('photo').style.display = 'none';
+  $('off').value = '';
+  photoData = '';
+  curLoc = '';
+}
+
+function resetScan(){
+  $('scan-sec').classList.remove('hide');
+  setTimeout(startScan, 300);
+}
+
+// ===== TABS =====
+function tab(t){
+  if(t !== 'p'){
+    stopScan();
+    cancelCam();
+  }
+  
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.pg').forEach(c => c.classList.remove('on'));
+  
+  const map = {p:0, d:1, c:2, s:3};
+  document.querySelectorAll('.tab')[map[t]].classList.add('on');
+  $('tab-'+t).classList.add('on');
+  
+  if(t === 'p'){
+    setTimeout(startScan, 200);
+  }
+  if(t === 'd' && logged){
+    update();
+  }
+  if(t === 's'){
+    $('size').textContent = getSize();
+    $('cnt').textContent = data.length;
+  }
+}
+
+// ===== DASHBOARD =====
+function update(){
+  if(!logged) return;
+  
+  const today = new Date().toDateString();
+  const todayData = data.filter(p => new Date(p.timestamp).toDateString() === today);
+  
+  $('t1').textContent = todayData.length;
+  $('t4').textContent = data.length;
+  
+  const locs = [...new Set(data.map(p => p.location))];
+  $('t2').textContent = locs.length;
+  
+  const offs = [...new Set(data.map(p => p.officer))];
+  $('t3').textContent = offs.length;
+  
+  fillFilters(locs, offs);
+  displayed = PAGE;
+  curFilter = null;
+  showHist(data);
+}
+
+function fillFilters(locs, offs){
+  const fl = $('fl');
+  const fo = $('fo');
+  
+  const curL = fl.value;
+  const curO = fo.value;
+  
+  fl.innerHTML = '<option value="">Semua</option>';
+  locs.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l;
+    opt.textContent = l;
+    fl.appendChild(opt);
+  });
+  fl.value = curL;
+  
+  fo.innerHTML = '<option value="">Semua</option>';
+  offs.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    fo.appendChild(opt);
+  });
+  fo.value = curO;
+}
+
+function showHist(arr){
+  const c = $('hist');
+  $('rcnt').textContent = arr.length;
+  
+  if(!arr.length){
+    c.innerHTML = '<p class="empty">Belum ada data patroli</p>';
+    $('more').classList.add('hide');
+    return;
+  }
+  
+  const sorted = [...arr].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  const toShow = sorted.slice(0, displayed);
+  
+  // Build HTML in chunks to avoid blocking
+  const html = toShow.map(r => {
+    const d = new Date(r.timestamp);
+    return `<div class="rec">
+      <h3>📍 ${r.location}</h3>
+      <p><strong>Petugas:</strong> ${r.officer}</p>
+      <p><strong>Waktu:</strong> ${d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}</p>
+      <img src="${r.photo}" loading="lazy" alt="Foto">
+    </div>`;
+  }).join('');
+  
+  c.innerHTML = html;
+  
+  if(displayed < sorted.length){
+    $('more').classList.remove('hide');
+    $('more').textContent = `Tampilkan ${Math.min(PAGE, sorted.length-displayed)} Lagi (${sorted.length-displayed} tersisa)`;
+  } else {
+    $('more').classList.add('hide');
+  }
+}
+
+function loadMore(){
+  displayed += PAGE;
+  showHist(curFilter || data);
+}
+
+function filter(){
+  const d = $('fd').value;
+  const l = $('fl').value;
+  const o = $('fo').value;
+  
+  let f = [...data];
+  if(d) f = f.filter(p => new Date(p.timestamp).toDateString() === new Date(d).toDateString());
+  if(l) f = f.filter(p => p.location === l);
+  if(o) f = f.filter(p => p.officer === o);
+  
+  curFilter = f;
+  displayed = PAGE;
+  showHist(f);
+}
+
+// ===== EXPORT PDF =====
+async function exportPDF(){
+  if(!data.length){ alert('Belum ada data'); return; }
+  
+  setBtnLoading('btn-pdf', true);
+  
+  try {
+    await loadPDFLib();
+    await new Promise(r => setTimeout(r, 100));
+    
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.text('LAPORAN PATROLI', 105, 15, {align:'center'});
+    doc.setFontSize(11);
+    doc.text('Lapas Kelas IIA Banyuasin', 105, 22, {align:'center'});
+    
+    const fd = $('fd').value;
+    const fl = $('fl').value;
+    const fo = $('fo').value;
+    
+    let txt = 'Filter: ';
+    if(fd) txt += `Tgl ${fd} `;
+    if(fl) txt += `| Lok: ${fl} `;
+    if(fo) txt += `| Pet: ${fo}`;
+    if(!fd && !fl && !fo) txt = 'Semua Data';
+    
+    doc.setFontSize(9);
+    doc.text(txt, 15, 30);
+    
+    let f = curFilter || [...data];
+    
+    let y = 38;
+    doc.setFontSize(9);
+    
+    f.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((r, i) => {
+      if(y > 270){ doc.addPage(); y = 20; }
+      const d = new Date(r.timestamp);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${i+1}. ${r.location}`, 15, y);
+      y += 5;
+      doc.setFont(undefined, 'normal');
+      doc.text(`Petugas: ${r.officer}`, 20, y);
+      y += 5;
+      doc.text(`Waktu: ${d.toLocaleString('id-ID')}`, 20, y);
+      y += 8;
+    });
+    
+    const tp = doc.internal.pages.length - 1;
+    for(let i = 1; i <= tp; i++){
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(`Hal ${i}/${tp}`, 105, 290, {align:'center'});
+      doc.text(`Cetak: ${new Date().toLocaleString('id-ID')}`, 15, 290);
+    }
+    
+    doc.save(`Patroli_${new Date().toISOString().split('T')[0]}.pdf`);
+  } catch(e){
+    alert('Error PDF: '+e.message);
+  } finally {
+    setBtnLoading('btn-pdf', false);
+  }
+}
+
+// ===== DATA MANAGEMENT =====
+function cleanOld(silent){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - RETENTION);
+  const before = data.length;
+  data = data.filter(p => new Date(p.timestamp) > cutoff);
+  const removed = before - data.length;
+  save();
+  if(logged) update();
+  if(!silent){
+    alert(removed > 0 ? `${removed} data lama dihapus` : 'Tidak ada data lama');
+  }
+}
+
+function clearAll(){
+  if(confirm('HAPUS SEMUA DATA?\nTindakan ini tidak bisa dibatalkan!')){
+    if(confirm('Yakin sekali lagi?')){
+      data = [];
+      save();
+      if(logged) update();
+      alert('Semua data dihapus');
+    }
+  }
+}
+
+// ===== EXPORT/IMPORT =====
+function exportData(){
+  if(!data.length){ alert('Belum ada data'); return; }
+  
+  const exp = {
+    version: '1.0',
+    exported: new Date().toISOString(),
+    officers: officers,
+    data: data
+  };
+  
+  const blob = new Blob([JSON.stringify(exp, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Backup_Patroli_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imp = JSON.parse(e.target.result);
+      if(!imp.data || !Array.isArray(imp.data)){
+        alert('File tidak valid');
+        return;
+      }
+      
+      if(confirm(`Import ${imp.data.length} data?\nData yang ada akan digabungkan.`)){
+        // Merge data, hindari duplikat
+        const existingIds = new Set(data.map(d => d.id));
+        const newData = imp.data.filter(d => !existingIds.has(d.id));
+        data = [...data, ...newData];
         
-        const SUPABASE_URL = 'https://tqzjyvwxoenxaitzgeos.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxemp5dnd4b2VueGFpdHpnZW9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MTgzMzksImV4cCI6MjA2MTk5NDMzOX0.wB0tmYbJT-B2W8qK9jMasQ_I47EFXXl';
+        if(imp.officers) officers = imp.officers;
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        save();
+        fillOffSel();
+        showOffList();
+        if(logged) update();
+        alert(`${newData.length} data baru ditambahkan`);
+      }
+    } catch(e){
+      alert('Error: '+e.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
 
-        // ==================== CONFIGURATION ====================
-        
-        const IMAGE_QUALITY = 0.7;
-        const IMAGE_MAX_WIDTH = 800;
+// ===== INIT =====
+$('fd').valueAsDate = new Date();
 
-        let officers = [
-            { name: "Agus Setiawan", nip: "199001011234567890" },
-            { name: "Budi Hartono", nip: "199102021234567891" },
-            { name: "Candra Wijaya", nip: "199203031234567892" },
-            { name: "Dedi Kusuma", nip: "199304041234567893" },
-            { name: "Eko Prasetyo", nip: "199405051234567894" }
-        ];
+window.addEventListener('load', () => {
+  load();
+  setTimeout(() => {
+    startScan();
+  }, 300);
+});
 
-        const checkpoints = [
-            { code: "TITIK-001", name: "Blok Hunian A - Lantai 1", description: "Area hunian napi risiko tinggi" },
-            { code: "TITIK-002", name: "Blok Hunian A - Lantai 2", description: "Area hunian napi risiko tinggi" },
-            { code: "TITIK-003", name: "Blok Hunian B - Lantai 1", description: "Area hunian napi risiko sedang" },
-            { code: "TITIK-004", name: "Blok Hunian B - Lantai 2", description: "Area hunian napi risiko sedang" },
-            { code: "TITIK-005", name: "Area Bengkel/Werkplaats", description: "Area kerja dengan peralatan" },
-            { code: "TITIK-006", name: "Dapur Umum", description: "Area dapur dan penyimpanan bahan" },
-            { code: "TITIK-007", name: "Ruang Besuk", description: "Area kunjungan keluarga" },
-            { code: "TITIK-008", name: "Pos Penjagaan Utama", description: "Gerbang utama Lapas" },
-            { code: "TITIK-009", name: "Tembok Keliling Timur", description: "Area keliling bagian timur" },
-            { code: "TITIK-010", name: "Tembok Keliling Barat", description: "Area keliling bagian barat" },
-            { code: "TITIK-011", name: "Area Olahraga/Lapangan", description: "Lapangan dan area rekreasi" },
-            { code: "TITIK-012", name: "Ruang Isolasi", description: "Area isolasi khusus" }
-        ];
-
-        const supervisorCredentials = {
-            username: "kakplp",
-            password: "lapas2026"
-        };
-
-        // ==================== STATE ====================
-        
-        let html5QrCode;
-        let cameraStream;
-        let currentLocation = '';
-        let capturedPhotoData = '';
-        let patrolData = [];
-        let isLoggedIn = false;
-
-        // ==================== UTILITY ====================
-
-        function showLoading(text = 'Memproses...') {
-            document.querySelector('.loading-text').textContent = text;
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
-
-        function compressImage(base64, maxWidth, quality) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.src = base64;
-            });
-        }
-
-        // ==================== SUPABASE FUNCTIONS ====================
-
-        async function uploadPhotoToCloud(base64Data) {
-            try {
-                const fileName = `patrol_${Date.now()}.jpg`;
-                const base64Image = base64Data.split(',')[1];
-                const blob = await fetch(`data:image/jpeg;base64,${base64Image}`).then(r => r.blob());
-                
-                const { data, error } = await supabase.storage
-                    .from('patrol-photos')
-                    .upload(fileName, blob, {
-                        contentType: 'image/jpeg'
-                    });
-
-                if (error) throw error;
-
-                const { data: publicURL } = supabase.storage
-                    .from('patrol-photos')
-                    .getPublicUrl(fileName);
-
-                return publicURL.publicUrl;
-            } catch (error) {
-                console.error('Error uploading photo:', error);
-                throw error;
-            }
-        }
-
-        async function savePatrolToCloud(officer, location, photoUrl) {
-            try {
-                const { data, error } = await supabase
-                    .from('patrols')
-                    .insert([
-                        {
-                            officer: officer,
-                            location: location,
-                            photo_url: photoUrl,
-                            timestamp: new Date().toISOString()
-                        }
-                    ]);
-
-                if (error) throw error;
-                return true;
-            } catch (error) {
-                console.error('Error saving patrol:', error);
-                throw error;
-            }
-        }
-
-        async function loadPatrolsFromCloud() {
-            try {
-                const { data, error } = await supabase
-                    .from('patrols')
-                    .select('*')
-                    .order('timestamp', { ascending: false });
-
-                if (error) throw error;
-                
-                patrolData = data.map(p => ({
-                    id: p.id,
-                    officer: p.officer,
-                    location: p.location,
-                    timestamp: p.timestamp,
-                    photo: p.photo_url
-                }));
-
-                return patrolData;
-            } catch (error) {
-                console.error('Error loading patrols:', error);
-                return [];
-            }
-        }
-
-        // ==================== DATA MANAGEMENT ====================
-
-        function loadData() {
-            const savedOfficers = localStorage.getItem('officers');
-            if (savedOfficers) {
-                officers = JSON.parse(savedOfficers);
-            }
-            
-            updateOfficerDropdown();
-            updateOfficersList();
-            updateCheckpointsList();
-        }
-
-        function saveOfficers() {
-            localStorage.setItem('officers', JSON.stringify(officers));
-        }
-
-        // ==================== OFFICER MANAGEMENT ====================
-
-        function updateOfficerDropdown() {
-            const select = document.getElementById('officer-name');
-            select.innerHTML = '<option value="">-- Pilih Petugas --</option>';
-            officers.forEach(officer => {
-                select.innerHTML += `<option value="${officer.name}">${officer.name} (${officer.nip})</option>`;
-            });
-        }
-
-        function updateOfficersList() {
-            const container = document.getElementById('officers-list');
-            if (officers.length === 0) {
-                container.innerHTML = '<p style="color: #999;">Belum ada petugas terdaftar</p>';
-                return;
-            }
-            
-            container.innerHTML = officers.map((officer, index) => `
-                <div style="background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>${officer.name}</strong><br>
-                        <small style="color: #666;">NIP: ${officer.nip}</small>
-                    </div>
-                    <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="deleteOfficer(${index})">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        function showAddOfficer() {
-            document.getElementById('add-officer-form').classList.remove('hidden');
-        }
-
-        function cancelAddOfficer() {
-            document.getElementById('add-officer-form').classList.add('hidden');
-            document.getElementById('new-officer-name').value = '';
-            document.getElementById('new-officer-nip').value = '';
-        }
-
-        function addOfficer() {
-            const name = document.getElementById('new-officer-name').value.trim();
-            const nip = document.getElementById('new-officer-nip').value.trim();
-            
-            if (!name || !nip) {
-                alert('Nama dan NIP harus diisi!');
-                return;
-            }
-            
-            officers.push({ name, nip });
-            saveOfficers();
-            updateOfficerDropdown();
-            updateOfficersList();
-            cancelAddOfficer();
-            showMessage('Petugas berhasil ditambahkan!', 'success');
-        }
-
-        function deleteOfficer(index) {
-            if (confirm(`Hapus petugas ${officers[index].name}?`)) {
-                officers.splice(index, 1);
-                saveOfficers();
-                updateOfficerDropdown();
-                updateOfficersList();
-            }
-        }
-
-        // ==================== CHECKPOINTS ====================
-
-        function updateCheckpointsList() {
-            const container = document.getElementById('checkpoint-list');
-            container.innerHTML = checkpoints.map(cp => `
-                <div class="checkpoint-card">
-                    <h3>${cp.name}</h3>
-                    <p>${cp.description}</p>
-                    <p><strong>Kode QR:</strong> <code>${cp.code}</code></p>
-                </div>
-            `).join('');
-        }
-
-        // ==================== LOGIN ====================
-
-        function showLogin() {
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-        }
-
-        function cancelLogin() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            switchTab('patrol');
-        }
-
-        function attemptLogin() {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-            const messageDiv = document.getElementById('login-message');
-            
-            if (username === supervisorCredentials.username && password === supervisorCredentials.password) {
-                isLoggedIn = true;
-                document.getElementById('logged-user').textContent = 'Ka.KPLP';
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('dashboard-locked').classList.add('hidden');
-                document.getElementById('dashboard-content').classList.remove('hidden');
-                switchTab('dashboard');
-                refreshData();
-            } else {
-                messageDiv.textContent = 'Username atau password salah!';
-                messageDiv.className = 'status-message status-error';
-                messageDiv.style.display = 'block';
-                setTimeout(() => {
-                    messageDiv.style.display = 'none';
-                }, 3000);
-            }
-            
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-        }
-
-        function logout() {
-            if (confirm('Logout dari dashboard?')) {
-                isLoggedIn = false;
-                document.getElementById('dashboard-locked').classList.remove('hidden');
-                document.getElementById('dashboard-content').classList.add('hidden');
-                switchTab('patrol');
-            }
-        }
-
-        // ==================== QR SCANNER ====================
-
-        function initScanner() {
-            html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 5, qrbox: { width: 250, height: 250 } },
-                onScanSuccess,
-                onScanError
-            ).catch(err => {
-                showMessage('Error memulai scanner: ' + err, 'error');
-            });
-        }
-
-        function onScanSuccess(decodedText) {
-            const checkpoint = checkpoints.find(cp => cp.code === decodedText);
-            if (checkpoint) {
-                currentLocation = `${checkpoint.name} (${checkpoint.code})`;
-            } else {
-                currentLocation = decodedText;
-            }
-            
-            document.getElementById('location-detected').value = currentLocation;
-            showMessage('QR Code terdeteksi: ' + currentLocation, 'success');
-            
-            stopScanner();
-            showCamera();
-        }
-
-        function onScanError(errorMessage) {
-            // Ignore
-        }
-
-        function stopScanner() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-section').classList.add('hidden');
-                }).catch(err => {
-                    console.log(err);
-                });
-            }
-        }
-
-        function showCamera() {
-            document.getElementById('camera-section').classList.remove('hidden');
-            
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false 
-            })
-            .then(stream => {
-                cameraStream = stream;
-                const video = document.getElementById('camera-preview');
-                video.srcObject = stream;
-            })
-            .catch(err => {
-                showMessage('Error mengakses kamera: ' + err, 'error');
-            });
-        }
-
-        async function capturePhoto() {
-            showLoading('Mengambil foto...');
-            
-            const video = document.getElementById('camera-preview');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            
-            const rawPhoto = canvas.toDataURL('image/jpeg', 0.9);
-            capturedPhotoData = await compressImage(rawPhoto, IMAGE_MAX_WIDTH, IMAGE_QUALITY);
-            
-            const img = document.getElementById('captured-photo');
-            img.src = capturedPhotoData;
-            img.style.display = 'block';
-            
-            hideLoading();
-            showMessage('Foto berhasil diambil!', 'success');
-        }
-
-        async function savePatrolRecord() {
-            const officerName = document.getElementById('officer-name').value;
-            
-            if (!officerName) {
-                showMessage('Petugas harus dipilih!', 'error');
-                return;
-            }
-            
-            if (!capturedPhotoData) {
-                showMessage('Foto harus diambil terlebih dahulu!', 'error');
-                return;
-            }
-
-            try {
-                showLoading('Mengupload foto ke cloud...');
-                
-                const photoUrl = await uploadPhotoToCloud(capturedPhotoData);
-                
-                showLoading('Menyimpan data patroli...');
-                await savePatrolToCloud(officerName, currentLocation, photoUrl);
-                
-                hideLoading();
-                showMessage('✅ Data patroli berhasil disimpan ke cloud!', 'success');
-                
-                setTimeout(() => {
-                    cancelCamera();
-                    resetScanner();
-                }, 2000);
-            } catch (error) {
-                hideLoading();
-                showMessage('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        function cancelCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('camera-section').classList.add('hidden');
-            document.getElementById('captured-photo').style.display = 'none';
-            document.getElementById('officer-name').value = '';
-            capturedPhotoData = '';
-            currentLocation = '';
-        }
-
-        function resetScanner() {
-            document.getElementById('scanner-section').classList.remove('hidden');
-            setTimeout(() => initScanner(), 500);
-        }
-
-        // ==================== TAB SWITCHING ====================
-
-        function switchTab(tab) {
-            if (tab !== 'patrol' && html5QrCode) {
-                stopScanner();
-                cancelCamera();
-            }
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            const tabMap = {
-                'patrol': { btn: 0, content: 'patrol-tab' },
-                'dashboard': { btn: 1, content: 'dashboard-tab' },
-                'checkpoints': { btn: 2, content: 'checkpoints-tab' },
-                'settings': { btn: 3, content: 'settings-tab' }
-            };
-            
-            const selected = tabMap[tab];
-            document.querySelectorAll('.tab-btn')[selected.btn].classList.add('active');
-            document.getElementById(selected.content).classList.add('active');
-            
-            if (tab === 'patrol' && (!html5QrCode || !html5QrCode.isScanning)) {
-                setTimeout(() => initScanner(), 100);
-            }
-            
-            if (tab === 'dashboard' && isLoggedIn) {
-                refreshData();
-            }
-        }
-
-        // ==================== DASHBOARD ====================
-
-        async function refreshData() {
-            if (!isLoggedIn) return;
-            
-            showLoading('Memuat data dari cloud...');
-            
-            try {
-                await loadPatrolsFromCloud();
-                updateDashboard();
-                hideLoading();
-                showMessage('Data berhasil di-refresh!', 'success');
-            } catch (error) {
-                hideLoading();
-                showMessage('Error loading data: ' + error.message, 'error');
-            }
-        }
-
-        function updateDashboard() {
-            if (!isLoggedIn) return;
-            
-            const today = new Date().toDateString();
-            const todayPatrols = patrolData.filter(p => 
-                new Date(p.timestamp).toDateString() === today
-            );
-            
-            document.getElementById('total-patrols').textContent = todayPatrols.length;
-            document.getElementById('total-all-patrols').textContent = patrolData.length;
-            document.getElementById('total-cloud-patrols').textContent = patrolData.length;
-            
-            const uniqueLocations = [...new Set(patrolData.map(p => p.location))];
-            document.getElementById('total-locations').textContent = uniqueLocations.length;
-            
-            const uniqueOfficers = [...new Set(patrolData.map(p => p.officer))];
-            document.getElementById('total-officers').textContent = uniqueOfficers.length;
-
-            updateFilterOptions(uniqueLocations, uniqueOfficers);
-            displayPatrolHistory(patrolData);
-        }
-
-        function updateFilterOptions(locations, officers) {
-            const locationSelect = document.getElementById('filter-location');
-            const officerSelect = document.getElementById('filter-officer');
-            
-            locationSelect.innerHTML = '<option value="">Semua Lokasi</option>';
-            locations.forEach(loc => {
-                locationSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
-            });
-            
-            officerSelect.innerHTML = '<option value="">Semua Petugas</option>';
-            officers.forEach(off => {
-                officerSelect.innerHTML += `<option value="${off}">${off}</option>`;
-            });
-        }
-
-        function displayPatrolHistory(data) {
-            const container = document.getElementById('patrol-history');
-            
-            if (data.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">Belum ada data patroli</p>';
-                return;
-            }
-            
-            container.innerHTML = '';
-            const sorted = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            sorted.forEach(record => {
-                const date = new Date(record.timestamp);
-                const div = document.createElement('div');
-                div.className = 'patrol-record';
-                div.innerHTML = `
-                    <h3>📍 ${record.location}</h3>
-                    <p><strong>Petugas:</strong> ${record.officer}</p>
-                    <p><strong>Waktu:</strong> ${date.toLocaleString('id-ID', {
-                        dateStyle: 'full',
-                        timeStyle: 'short'
-                    })}</p>
-                    <img src="${record.photo}" alt="Foto Patroli" loading="lazy">
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function applyFilters() {
-            const date = document.getElementById('filter-date').value;
-            const location = document.getElementById('filter-location').value;
-            const officer = document.getElementById('filter-officer').value;
-            
-            let filtered = [...patrolData];
-            
-            if (date) {
-                filtered = filtered.filter(p => 
-                    new Date(p.timestamp).toDateString() === new Date(date).toDateString()
-                );
-            }
-            
-            if (location) {
-                filtered = filtered.filter(p => p.location === location);
-            }
-            
-            if (officer) {
-                filtered = filtered.filter(p => p.officer === officer);
-            }
-            
-            displayPatrolHistory(filtered);
-            showMessage(`Menampilkan ${filtered.length} data patroli`, 'info');
-        }
-
-        function exportToPDF() {
-            showLoading('Membuat PDF...');
-            
-            setTimeout(() => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(16);
-                doc.text('LAPORAN PATROLI PENGAMANAN', 105, 15, { align: 'center' });
-                doc.setFontSize(12);
-                doc.text('Lapas Kelas IIA Banyuasin', 105, 22, { align: 'center' });
-                
-                doc.setFontSize(10);
-                const date = document.getElementById('filter-date').value;
-                const location = document.getElementById('filter-location').value;
-                const officer = document.getElementById('filter-officer').value;
-                
-                let filterText = 'Filter: ';
-                if (date) filterText += `Tanggal: ${date} | `;
-                if (location) filterText += `Lokasi: ${location} | `;
-                if (officer) filterText += `Petugas: ${officer}`;
-                if (!date && !location && !officer) filterText = 'Semua Data';
-                
-                doc.text(filterText, 15, 30);
-                
-                let filtered = [...patrolData];
-                if (date) {
-                    filtered = filtered.filter(p => 
-                        new Date(p.timestamp).toDateString() === new Date(date).toDateString()
-                    );
-                }
-                if (location) filtered = filtered.filter(p => p.location === location);
-                if (officer) filtered = filtered.filter(p => p.officer === officer);
-                
-                let y = 40;
-                doc.setFontSize(9);
-                
-                filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((record, index) => {
-                    if (y > 270) {
-                        doc.addPage();
-                        y = 20;
-                    }
-                    
-                    const date = new Date(record.timestamp);
-                    
-                    doc.setFont(undefined, 'bold');
-                    doc.text(`${index + 1}. ${record.location}`, 15, y);
-                    y += 6;
-                    
-                    doc.setFont(undefined, 'normal');
-                    doc.text(`Petugas: ${record.officer}`, 20, y);
-                    y += 5;
-                    doc.text(`Waktu: ${date.toLocaleString('id-ID')}`, 20, y);
-                    y += 10;
-                });
-                
-                const totalPages = doc.internal.pages.length - 1;
-                for (let i = 1; i <= totalPages; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(8);
-                    doc.text(`Halaman ${i} dari ${totalPages}`, 105, 290, { align: 'center' });
-                    doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 15, 290);
-                }
-                
-                doc.save(`Laporan_Patroli_${new Date().toISOString().split('T')[0]}.pdf`);
-                
-                hideLoading();
-                showMessage('PDF berhasil didownload!', 'success');
-            }, 100);
-        }
-
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('status-message');
-            messageDiv.textContent = message;
-            messageDiv.className = 'status-message status-' + type;
-            messageDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // ==================== INITIALIZATION ====================
-
-        document.getElementById('filter-date').valueAsDate = new Date();
-        
-        window.addEventListener('load', () => {
-            loadData();
-            initScanner();
-        });
-    </script>
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  if(qr && qr.isScanning){
+    try { qr.stop(); } catch(e){}
+  }
+  if(stream){
+    stream.getTracks().forEach(t => t.stop());
+  }
+});
+</script>
 </body>
 </html>
