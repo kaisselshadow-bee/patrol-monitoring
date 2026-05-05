@@ -178,6 +178,15 @@
             background: #c82333;
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
         .status-message {
             padding: 15px;
             border-radius: 8px;
@@ -273,6 +282,78 @@
             margin-top: 20px;
         }
 
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+
+        .checkpoint-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .checkpoint-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .checkpoint-card h3 {
+            color: #1e3c72;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .checkpoint-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .checkpoint-card code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #scanner-section, #camera-section {
+            transition: all 0.3s ease;
+        }
+
+        .user-info {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info span {
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 20px;
@@ -286,141 +367,406 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-        }
 
-        .hidden {
-            display: none !important;
-        }
-
-        #scanner-section, #camera-section {
-            transition: all 0.3s ease;
+            .checkpoint-list {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🛡️ Sistem Monitoring Patroli</h1>
-            <p>Lapas Kelas IIA Banyuasin - Bidang Pengamanan</p>
-        </div>
-
-        <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('patrol')">📱 Patroli</button>
-            <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
-        </div>
-
-        <!-- TAB PATROLI -->
-        <div id="patrol-tab" class="tab-content active">
-            <div class="card">
-                <h2>Scan QR Code Lokasi</h2>
-                <div id="status-message" class="status-message"></div>
-                
-                <div id="scanner-section">
-                    <div id="qr-reader"></div>
-                    <button class="btn btn-danger" onclick="stopScanner()">Hentikan Scanner</button>
+        <!-- LOGIN SCREEN FOR DASHBOARD -->
+        <div id="login-screen" class="hidden">
+            <div class="login-container">
+                <h2>🔐 Login Ka.KPLP</h2>
+                <div id="login-message" class="status-message"></div>
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="login-username" placeholder="Masukkan username">
                 </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="login-password" placeholder="Masukkan password">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="attemptLogin()">Login</button>
+                <button class="btn btn-warning" style="width: 100%; margin-top: 10px;" onclick="cancelLogin()">Kembali</button>
+            </div>
+        </div>
 
-                <div id="camera-section" class="hidden">
-                    <div class="form-group">
-                        <label>Nama Petugas:</label>
-                        <input type="text" id="officer-name" placeholder="Masukkan nama petugas">
-                    </div>
+        <!-- MAIN APP -->
+        <div id="main-app">
+            <div class="header">
+                <h1>🛡️ Sistem Monitoring Patroli</h1>
+                <p>Lapas Kelas IIA Banyuasin - Bidang Pengamanan</p>
+            </div>
 
-                    <div class="form-group">
-                        <label>Lokasi yang Terdeteksi:</label>
-                        <input type="text" id="location-detected" readonly>
-                    </div>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('patrol')">📱 Patroli</button>
+                <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-btn" onclick="switchTab('checkpoints')">📍 Titik Patroli</button>
+                <button class="tab-btn" onclick="switchTab('settings')">⚙️ Pengaturan</button>
+            </div>
 
-                    <p><strong>Ambil Foto Lokasi:</strong></p>
-                    <video id="camera-preview" autoplay playsinline></video>
+            <!-- TAB PATROLI -->
+            <div id="patrol-tab" class="tab-content active">
+                <div class="card">
+                    <h2>Scan QR Code Lokasi</h2>
+                    <div id="status-message" class="status-message"></div>
                     
-                    <div class="photo-preview">
-                        <img id="captured-photo" />
+                    <div id="scanner-section">
+                        <div id="qr-reader"></div>
+                        <button class="btn btn-danger" onclick="stopScanner()">Hentikan Scanner</button>
                     </div>
 
-                    <div style="margin-top: 20px;">
-                        <button class="btn btn-primary" onclick="capturePhoto()">📸 Ambil Foto</button>
-                        <button class="btn btn-success" onclick="savePatrolRecord()">💾 Simpan Data Patroli</button>
-                        <button class="btn btn-danger" onclick="cancelCamera()">❌ Batal</button>
+                    <div id="camera-section" class="hidden">
+                        <div class="form-group">
+                            <label>Pilih Petugas:</label>
+                            <select id="officer-name">
+                                <option value="">-- Pilih Petugas --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Lokasi yang Terdeteksi:</label>
+                            <input type="text" id="location-detected" readonly>
+                        </div>
+
+                        <p><strong>Ambil Foto Lokasi:</strong></p>
+                        <video id="camera-preview" autoplay playsinline></video>
+                        
+                        <div class="photo-preview">
+                            <img id="captured-photo" />
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="capturePhoto()">📸 Ambil Foto</button>
+                            <button class="btn btn-success" onclick="savePatrolRecord()">💾 Simpan Data Patroli</button>
+                            <button class="btn btn-danger" onclick="cancelCamera()">❌ Batal</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- TAB DASHBOARD -->
-        <div id="dashboard-tab" class="tab-content">
-            <div class="card">
-                <h2>Statistik Real-Time</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3 id="total-patrols">0</h3>
-                        <p>Total Patroli Hari Ini</p>
+            <!-- TAB DASHBOARD -->
+            <div id="dashboard-tab" class="tab-content">
+                <div id="dashboard-locked" class="card">
+                    <h2>🔒 Akses Terbatas</h2>
+                    <p style="text-align: center; padding: 30px;">
+                        Dashboard hanya bisa diakses oleh Ka.KPLP.<br>
+                        Silakan login terlebih dahulu.
+                    </p>
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="showLogin()">🔐 Login sebagai Ka.KPLP</button>
                     </div>
-                    <div class="stat-card">
-                        <h3 id="total-locations">0</h3>
-                        <p>Lokasi Tercatat</p>
+                </div>
+
+                <div id="dashboard-content" class="hidden">
+                    <div class="user-info">
+                        <span>👤 Login sebagai: <strong id="logged-user"></strong></span>
+                        <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="logout()">Logout</button>
                     </div>
-                    <div class="stat-card">
-                        <h3 id="total-officers">0</h3>
-                        <p>Petugas Aktif</p>
+
+                    <div class="card">
+                        <h2>Statistik Real-Time</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3 id="total-patrols">0</h3>
+                                <p>Total Patroli Hari Ini</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="total-locations">0</h3>
+                                <p>Lokasi Tercatat</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="total-officers">0</h3>
+                                <p>Petugas Aktif</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Filter Laporan</h2>
+                        <div class="filter-section">
+                            <div class="form-group">
+                                <label>Tanggal:</label>
+                                <input type="date" id="filter-date">
+                            </div>
+                            <div class="form-group">
+                                <label>Lokasi:</label>
+                                <select id="filter-location">
+                                    <option value="">Semua Lokasi</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Petugas:</label>
+                                <select id="filter-officer">
+                                    <option value="">Semua Petugas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="applyFilters()">🔍 Terapkan Filter</button>
+                        <button class="btn btn-success" onclick="exportToPDF()">📄 Export PDF</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>Riwayat Patroli</h2>
+                        <div id="patrol-history"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h2>Filter Laporan</h2>
-                <div class="filter-section">
-                    <div class="form-group">
-                        <label>Tanggal:</label>
-                        <input type="date" id="filter-date">
-                    </div>
-                    <div class="form-group">
-                        <label>Lokasi:</label>
-                        <select id="filter-location">
-                            <option value="">Semua Lokasi</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Petugas:</label>
-                        <select id="filter-officer">
-                            <option value="">Semua Petugas</option>
-                        </select>
-                    </div>
+            <!-- TAB TITIK PATROLI -->
+            <div id="checkpoints-tab" class="tab-content">
+                <div class="card">
+                    <h2>📍 Daftar Titik Patroli</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Berikut adalah daftar titik-titik patroli yang sudah terdaftar. Setiap titik memiliki kode QR unik yang harus dipindai saat patroli.
+                    </p>
+                    <div id="checkpoint-list" class="checkpoint-list"></div>
                 </div>
-                <button class="btn btn-primary" onclick="applyFilters()">🔍 Terapkan Filter</button>
-                <button class="btn btn-success" onclick="exportToPDF()">📄 Export PDF</button>
-                <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+
+                <div class="card">
+                    <h2>📄 Cara Membuat QR Code</h2>
+                    <ol style="line-height: 2; color: #555;">
+                        <li>Buka website generator QR Code gratis: <a href="https://www.qr-code-generator.com/" target="_blank">QR Code Generator</a></li>
+                        <li>Pilih tipe <strong>"Text"</strong></li>
+                        <li>Salin <strong>Kode QR</strong> dari daftar di atas (contoh: <code>TITIK-001</code>)</li>
+                        <li>Paste kode tersebut ke generator</li>
+                        <li>Download QR Code dalam format PNG atau PDF</li>
+                        <li>Cetak dan pasang di lokasi yang sesuai</li>
+                    </ol>
+                </div>
             </div>
 
-            <div class="card">
-                <h2>Riwayat Patroli</h2>
-                <div id="patrol-history"></div>
+            <!-- TAB PENGATURAN -->
+            <div id="settings-tab" class="tab-content">
+                <div class="card">
+                    <h2>⚙️ Pengaturan Sistem</h2>
+                    
+                    <h3 style="color: #1e3c72; margin-top: 20px;">Daftar Petugas</h3>
+                    <div id="officers-list" style="margin: 15px 0;"></div>
+                    <button class="btn btn-primary" onclick="showAddOfficer()">➕ Tambah Petugas</button>
+
+                    <div id="add-officer-form" class="hidden" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                        <h4>Tambah Petugas Baru</h4>
+                        <div class="form-group">
+                            <label>Nama Lengkap:</label>
+                            <input type="text" id="new-officer-name" placeholder="Contoh: Budi Santoso">
+                        </div>
+                        <div class="form-group">
+                            <label>NIP:</label>
+                            <input type="text" id="new-officer-nip" placeholder="Contoh: 199012345678901234">
+                        </div>
+                        <button class="btn btn-success" onclick="addOfficer()">💾 Simpan</button>
+                        <button class="btn btn-danger" onclick="cancelAddOfficer()">❌ Batal</button>
+                    </div>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 2px solid #e9ecef;">
+
+                    <h3 style="color: #1e3c72;">Data & Reset</h3>
+                    <p style="color: #666; margin: 10px 0;">Hapus semua data patroli yang tersimpan. Tindakan ini tidak dapat dibatalkan!</p>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data Patroli</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ==================== CONFIGURATION ====================
+        
+        // Default data petugas (bisa ditambah/edit via pengaturan)
+        let officers = [
+            { name: "Agus Setiawan", nip: "199001011234567890" },
+            { name: "Budi Hartono", nip: "199102021234567891" },
+            { name: "Candra Wijaya", nip: "199203031234567892" },
+            { name: "Dedi Kusuma", nip: "199304041234567893" },
+            { name: "Eko Prasetyo", nip: "199405051234567894" }
+        ];
+
+        // Daftar titik patroli (bisa disesuaikan)
+        const checkpoints = [
+            { code: "TITIK-001", name: "Blok Hunian A - Lantai 1", description: "Area hunian napi risiko tinggi" },
+            { code: "TITIK-002", name: "Blok Hunian A - Lantai 2", description: "Area hunian napi risiko tinggi" },
+            { code: "TITIK-003", name: "Blok Hunian B - Lantai 1", description: "Area hunian napi risiko sedang" },
+            { code: "TITIK-004", name: "Blok Hunian B - Lantai 2", description: "Area hunian napi risiko sedang" },
+            { code: "TITIK-005", name: "Area Bengkel/Werkplaats", description: "Area kerja dengan peralatan" },
+            { code: "TITIK-006", name: "Dapur Umum", description: "Area dapur dan penyimpanan bahan makanan" },
+            { code: "TITIK-007", name: "Ruang Besuk", description: "Area kunjungan keluarga" },
+            { code: "TITIK-008", name: "Pos Penjagaan Utama", description: "Gerbang utama Lapas" },
+            { code: "TITIK-009", name: "Tembok Keliling Timur", description: "Area keliling bagian timur" },
+            { code: "TITIK-010", name: "Tembok Keliling Barat", description: "Area keliling bagian barat" },
+            { code: "TITIK-011", name: "Area Olahraga/Lapangan", description: "Lapangan dan area rekreasi" },
+            { code: "TITIK-012", name: "Ruang Isolasi", description: "Area isolasi khusus" }
+        ];
+
+        // Kredensial Ka.KPLP (bisa diubah)
+        const supervisorCredentials = {
+            username: "kakplp",
+            password: "lapas2026"
+        };
+
+        // ==================== STATE MANAGEMENT ====================
+        
         let html5QrCode;
         let cameraStream;
         let currentLocation = '';
         let capturedPhotoData = '';
         let patrolData = [];
+        let isLoggedIn = false;
 
-        // Load data from localStorage
+        // ==================== INITIALIZATION ====================
+
         function loadData() {
+            const savedOfficers = localStorage.getItem('officers');
+            if (savedOfficers) {
+                officers = JSON.parse(savedOfficers);
+            }
+            
             const saved = localStorage.getItem('patrolData');
             if (saved) {
                 patrolData = JSON.parse(saved);
             }
+            
+            updateOfficerDropdown();
+            updateOfficersList();
+            updateCheckpointsList();
             updateDashboard();
         }
 
-        // Save data to localStorage
         function saveData() {
             localStorage.setItem('patrolData', JSON.stringify(patrolData));
+            localStorage.setItem('officers', JSON.stringify(officers));
         }
 
-        // Initialize QR Scanner
+        // ==================== OFFICER MANAGEMENT ====================
+
+        function updateOfficerDropdown() {
+            const select = document.getElementById('officer-name');
+            select.innerHTML = '<option value="">-- Pilih Petugas --</option>';
+            officers.forEach(officer => {
+                select.innerHTML += `<option value="${officer.name}">${officer.name} (${officer.nip})</option>`;
+            });
+        }
+
+        function updateOfficersList() {
+            const container = document.getElementById('officers-list');
+            if (officers.length === 0) {
+                container.innerHTML = '<p style="color: #999;">Belum ada petugas terdaftar</p>';
+                return;
+            }
+            
+            container.innerHTML = officers.map((officer, index) => `
+                <div style="background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${officer.name}</strong><br>
+                        <small style="color: #666;">NIP: ${officer.nip}</small>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 8px 15px; margin: 0;" onclick="deleteOfficer(${index})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function showAddOfficer() {
+            document.getElementById('add-officer-form').classList.remove('hidden');
+        }
+
+        function cancelAddOfficer() {
+            document.getElementById('add-officer-form').classList.add('hidden');
+            document.getElementById('new-officer-name').value = '';
+            document.getElementById('new-officer-nip').value = '';
+        }
+
+        function addOfficer() {
+            const name = document.getElementById('new-officer-name').value.trim();
+            const nip = document.getElementById('new-officer-nip').value.trim();
+            
+            if (!name || !nip) {
+                alert('Nama dan NIP harus diisi!');
+                return;
+            }
+            
+            officers.push({ name, nip });
+            saveData();
+            updateOfficerDropdown();
+            updateOfficersList();
+            cancelAddOfficer();
+            alert('Petugas berhasil ditambahkan!');
+        }
+
+        function deleteOfficer(index) {
+            if (confirm(`Hapus petugas ${officers[index].name}?`)) {
+                officers.splice(index, 1);
+                saveData();
+                updateOfficerDropdown();
+                updateOfficersList();
+            }
+        }
+
+        // ==================== CHECKPOINTS ====================
+
+        function updateCheckpointsList() {
+            const container = document.getElementById('checkpoint-list');
+            container.innerHTML = checkpoints.map(cp => `
+                <div class="checkpoint-card">
+                    <h3>${cp.name}</h3>
+                    <p>${cp.description}</p>
+                    <p><strong>Kode QR:</strong> <code>${cp.code}</code></p>
+                </div>
+            `).join('');
+        }
+
+        // ==================== LOGIN SYSTEM ====================
+
+        function showLogin() {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        function cancelLogin() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            switchTab('patrol');
+        }
+
+        function attemptLogin() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const messageDiv = document.getElementById('login-message');
+            
+            if (username === supervisorCredentials.username && password === supervisorCredentials.password) {
+                isLoggedIn = true;
+                document.getElementById('logged-user').textContent = 'Ka.KPLP';
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('dashboard-locked').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                switchTab('dashboard');
+                updateDashboard();
+            } else {
+                messageDiv.textContent = 'Username atau password salah!';
+                messageDiv.className = 'status-message status-error';
+                messageDiv.style.display = 'block';
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+            
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+        }
+
+        function logout() {
+            if (confirm('Logout dari dashboard?')) {
+                isLoggedIn = false;
+                document.getElementById('dashboard-locked').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                switchTab('patrol');
+            }
+        }
+
+        // ==================== QR SCANNER ====================
+
         function initScanner() {
             html5QrCode = new Html5Qrcode("qr-reader");
             html5QrCode.start(
@@ -437,11 +783,17 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            currentLocation = decodedText;
-            document.getElementById('location-detected').value = decodedText;
-            showMessage('QR Code terdeteksi: ' + decodedText, 'success');
+            // Check if scanned code is a valid checkpoint
+            const checkpoint = checkpoints.find(cp => cp.code === decodedText);
+            if (checkpoint) {
+                currentLocation = `${checkpoint.name} (${checkpoint.code})`;
+            } else {
+                currentLocation = decodedText;
+            }
             
-            // Stop scanner and show camera
+            document.getElementById('location-detected').value = currentLocation;
+            showMessage('QR Code terdeteksi: ' + currentLocation, 'success');
+            
             stopScanner();
             showCamera();
         }
@@ -495,10 +847,10 @@
         }
 
         function savePatrolRecord() {
-            const officerName = document.getElementById('officer-name').value.trim();
+            const officerName = document.getElementById('officer-name').value;
             
             if (!officerName) {
-                showMessage('Nama petugas harus diisi!', 'error');
+                showMessage('Petugas harus dipilih!', 'error');
                 return;
             }
             
@@ -542,26 +894,43 @@
             initScanner();
         }
 
+        // ==================== TAB SWITCHING ====================
+
         function switchTab(tab) {
+            // Stop scanner when leaving patrol tab
+            if (tab !== 'patrol' && html5QrCode) {
+                stopScanner();
+                cancelCamera();
+            }
+            
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            if (tab === 'patrol') {
-                document.querySelector('[onclick="switchTab(\'patrol\')"]').classList.add('active');
-                document.getElementById('patrol-tab').classList.add('active');
-                if (!html5QrCode || !html5QrCode.isScanning) {
-                    initScanner();
-                }
-            } else {
-                document.querySelector('[onclick="switchTab(\'dashboard\')"]').classList.add('active');
-                document.getElementById('dashboard-tab').classList.add('active');
-                stopScanner();
+            const tabMap = {
+                'patrol': { btn: 0, content: 'patrol-tab' },
+                'dashboard': { btn: 1, content: 'dashboard-tab' },
+                'checkpoints': { btn: 2, content: 'checkpoints-tab' },
+                'settings': { btn: 3, content: 'settings-tab' }
+            };
+            
+            const selected = tabMap[tab];
+            document.querySelectorAll('.tab-btn')[selected.btn].classList.add('active');
+            document.getElementById(selected.content).classList.add('active');
+            
+            if (tab === 'patrol' && (!html5QrCode || !html5QrCode.isScanning)) {
+                setTimeout(() => initScanner(), 100);
+            }
+            
+            if (tab === 'dashboard' && isLoggedIn) {
                 updateDashboard();
             }
         }
 
+        // ==================== DASHBOARD ====================
+
         function updateDashboard() {
-            // Update statistics
+            if (!isLoggedIn) return;
+            
             const today = new Date().toDateString();
             const todayPatrols = patrolData.filter(p => 
                 new Date(p.timestamp).toDateString() === today
@@ -575,10 +944,7 @@
             const uniqueOfficers = [...new Set(patrolData.map(p => p.officer))];
             document.getElementById('total-officers').textContent = uniqueOfficers.length;
 
-            // Update filter options
             updateFilterOptions(uniqueLocations, uniqueOfficers);
-            
-            // Display patrol history
             displayPatrolHistory(patrolData);
         }
 
@@ -606,8 +972,6 @@
             }
             
             container.innerHTML = '';
-            
-            // Sort by timestamp (newest first)
             const sorted = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             sorted.forEach(record => {
@@ -656,13 +1020,11 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Title
             doc.setFontSize(16);
             doc.text('LAPORAN PATROLI PENGAMANAN', 105, 15, { align: 'center' });
             doc.setFontSize(12);
             doc.text('Lapas Kelas IIA Banyuasin', 105, 22, { align: 'center' });
             
-            // Filter info
             doc.setFontSize(10);
             const date = document.getElementById('filter-date').value;
             const location = document.getElementById('filter-location').value;
@@ -676,7 +1038,6 @@
             
             doc.text(filterText, 15, 30);
             
-            // Get filtered data
             let filtered = [...patrolData];
             if (date) {
                 filtered = filtered.filter(p => 
@@ -686,7 +1047,6 @@
             if (location) filtered = filtered.filter(p => p.location === location);
             if (officer) filtered = filtered.filter(p => p.officer === officer);
             
-            // Table data
             let y = 40;
             doc.setFontSize(9);
             
@@ -709,7 +1069,6 @@
                 y += 10;
             });
             
-            // Footer
             const totalPages = doc.internal.pages.length - 1;
             for (let i = 1; i <= totalPages; i++) {
                 doc.setPage(i);
@@ -724,10 +1083,12 @@
 
         function clearAllData() {
             if (confirm('Apakah Anda yakin ingin menghapus SEMUA data patroli? Tindakan ini tidak dapat dibatalkan!')) {
-                patrolData = [];
-                saveData();
-                updateDashboard();
-                showMessage('Semua data telah dihapus', 'info');
+                if (confirm('Konfirmasi sekali lagi: HAPUS SEMUA DATA?')) {
+                    patrolData = [];
+                    saveData();
+                    updateDashboard();
+                    showMessage('Semua data patroli telah dihapus', 'info');
+                }
             }
         }
 
@@ -742,10 +1103,9 @@
             }, 5000);
         }
 
-        // Set today's date as default filter
-        document.getElementById('filter-date').valueAsDate = new Date();
+        // ==================== INITIALIZATION ====================
 
-        // Initialize
+        document.getElementById('filter-date').valueAsDate = new Date();
         loadData();
         initScanner();
     </script>
