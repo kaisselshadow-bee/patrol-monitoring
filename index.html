@@ -103,7 +103,10 @@ hr{border:0;border-top:2px solid #e9ecef;margin:15px 0}
 
 <div id="scan-sec">
 <div id="reader"></div>
-<button class="btn bd" onclick="stopScan()">Stop Scanner</button>
+<div style="margin-top:8px">
+<button class="btn bs" id="btn-start-scan" onclick="startScanManual()">▶️ Start Scanner</button>
+<button class="btn bd" id="btn-stop-scan" onclick="stopScan()" style="display:none">⏹️ Stop Scanner</button>
+</div>
 </div>
 
 <div id="cam-sec" class="hide">
@@ -662,13 +665,21 @@ function onScanSuccess(text){
   $('btn-photo').classList.add('hide');
 }
 
+async function startScanManual(){
+  $('btn-start-scan').style.display = 'none';
+  $('btn-stop-scan').style.display = 'inline-block';
+  await startScan();
+}
+
 async function stopScan(){
   if(qr && qr.isScanning){
     try {
       await qr.stop();
-      $('scan-sec').classList.add('hide');
     } catch(e) { console.log(e); }
   }
+  $('scan-sec').classList.remove('hide');
+  $('btn-start-scan').style.display = 'inline-block';
+  $('btn-stop-scan').style.display = 'none';
 }
 
 async function openCamera(){
@@ -802,7 +813,7 @@ function cancelCam(){
 
 function resetScan(){
   $('scan-sec').classList.remove('hide');
-  setTimeout(startScan, 300);
+  // Tidak auto-start scanner
 }
 
 // TABS
@@ -819,9 +830,7 @@ function tab(t){
   document.querySelectorAll('.tab')[map[t]].classList.add('on');
   $('tab-'+t).classList.add('on');
   
-  if(t === 'p'){
-    setTimeout(startScan, 200);
-  }
+  // Tidak auto-start scanner saat pindah tab
   if(t === 'd' && logged){
     update();
   }
