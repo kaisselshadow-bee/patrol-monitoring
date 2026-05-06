@@ -115,11 +115,14 @@ hr{border:0;border-top:2px solid #e9ecef;margin:15px 0}
 <label>Lokasi:</label>
 <input id="loc" readonly>
 </div>
-<p style="font-weight:600;margin-bottom:6px;font-size:13px">Foto:</p>
-<video id="vid" autoplay playsinline muted></video>
+<div style="margin-bottom:12px">
+<button class="btn bp" id="btn-cam" onclick="openCamera()">📷 Buka Kamera</button>
+</div>
+<p style="font-weight:600;margin-bottom:6px;font-size:13px" id="lbl-foto" class="hide">Foto:</p>
+<video id="vid" autoplay playsinline muted style="display:none"></video>
 <div style="text-align:center"><img id="photo"></div>
 <div style="margin-top:12px">
-<button class="btn bp" id="btn-photo" onclick="takePhoto()">📸 Foto</button>
+<button class="btn bp hide" id="btn-photo" onclick="takePhoto()">📸 Ambil Foto</button>
 <button class="btn bs" id="btn-save" onclick="savePat()">💾 Simpan ke Cloud</button>
 <button class="btn bd" onclick="cancelCam()">❌ Batal</button>
 </div>
@@ -648,9 +651,15 @@ function onScanSuccess(text){
   
   curLoc = `${cp.name} (${cp.code})`;
   $('loc').value = curLoc;
-  msg('✅ QR: '+curLoc, 's');
+  msg('✅ Lokasi: '+curLoc+' — Pilih petugas lalu klik Buka Kamera', 's');
   stopScan();
-  showCam();
+  
+  // Tampilkan form tapi JANGAN buka kamera dulu
+  $('cam-sec').classList.remove('hide');
+  $('vid').style.display = 'none';
+  $('photo').style.display = 'none';
+  $('btn-cam').classList.remove('hide');
+  $('btn-photo').classList.add('hide');
 }
 
 async function stopScan(){
@@ -662,11 +671,18 @@ async function stopScan(){
   }
 }
 
-async function showCam(){
-  $('cam-sec').classList.remove('hide');
+async function openCamera(){
+  const off = $('off').value;
+  if(!off){ msg('Pilih petugas dulu sebelum buka kamera', 'e'); return; }
   
+  $('btn-cam').disabled = true;
+  $('btn-cam').innerHTML = '<span class="spn"></span>Membuka...';
+  
+  await showCam();
+}
+
+async function showCam(){
   try {
-    // Stop any existing stream first
     if(stream){
       stream.getTracks().forEach(t => t.stop());
       stream = null;
@@ -674,30 +690,31 @@ async function showCam(){
     }
     
     stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "environment", 
-        width: {ideal: 1280, max: 1920},
-        height: {ideal: 720, max: 1080}
-      },
+      video: {facingMode:"environment"},
       audio: false
     });
     
     const vid = $('vid');
     vid.srcObject = stream;
+    vid.style.display = 'block';
     
-    // Wait for video to be ready
     await new Promise((resolve, reject) => {
-      vid.onloadedmetadata = () => {
-        vid.play().then(resolve).catch(reject);
-      };
-      setTimeout(() => reject(new Error('Timeout')), 5000);
+      vid.onloadedmetadata = () => vid.play().then(resolve).catch(reject);
+      setTimeout(() => reject(new Error('Timeout')), 8000);
     });
     
-    console.log('✅ Camera started');
+    // Show foto button, hide open camera button
+    $('btn-cam').classList.add('hide');
+    $('btn-photo').classList.remove('hide');
+    $('lbl-foto').classList.remove('hide');
+    
+    msg('Kamera siap! Klik Ambil Foto', 's');
+    console.log('✅ Camera opened');
   } catch(e){
     console.error('Camera error:', e);
-    msg('Kamera gagal dibuka: ' + e.message, 'e');
-    cancelCam();
+    msg('Gagal buka kamera. Coba lagi.', 'e');
+    $('btn-cam').disabled = false;
+    $('btn-cam').innerHTML = '📷 Buka Kamera';
   }
 }
 
@@ -770,7 +787,14 @@ function cancelCam(){
     stream = null;
   }
   $('cam-sec').classList.add('hide');
+  $('vid').style.display = 'none';
+  $('vid').srcObject = null;
   $('photo').style.display = 'none';
+  $('btn-cam').classList.remove('hide');
+  $('btn-cam').disabled = false;
+  $('btn-cam').innerHTML = '📷 Buka Kamera';
+  $('btn-photo').classList.add('hide');
+  $('lbl-foto').classList.add('hide');
   $('off').value = '';
   photoData = '';
   curLoc = '';
