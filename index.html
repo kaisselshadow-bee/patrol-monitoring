@@ -645,19 +645,15 @@ async function startScan(){
 }
 
 function onScanSuccess(text){
-  const cp = checkpoints.find(c => c.code === text);
+  const cleaned = text.trim();
+  const cp = checkpoints.find(c => c.code === cleaned);
   
-  if(!cp){
-    msg('QR Code tidak valid! Harus TITIK-001 s/d TITIK-012', 'e');
-    return;
-  }
+  curLoc = cp ? `${cp.name} (${cp.code})` : cleaned;
   
-  curLoc = `${cp.name} (${cp.code})`;
   $('loc').value = curLoc;
   msg('✅ Lokasi: '+curLoc+' — Pilih petugas lalu klik Buka Kamera', 's');
   stopScan();
   
-  // Tampilkan form tapi JANGAN buka kamera dulu
   $('cam-sec').classList.remove('hide');
   $('vid').style.display = 'none';
   $('photo').style.display = 'none';
