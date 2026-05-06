@@ -348,17 +348,52 @@ function compress(b64, maxW, q){
 async function loadFromFirebase(){
   try {
     const { collection, getDocs, query, orderBy } = window.firestoreModules;
+    
+    // Load patrols
     const q = query(collection(window.db, 'patrols'), orderBy('timestamp', 'desc'));
     const snapshot = await getDocs(q);
     data = [];
     snapshot.forEach(doc => {
       data.push({ id: doc.id, ...doc.data() });
     });
-    console.log('📥 Loaded', data.length, 'records from Firebase');
+    console.log('📥 Loaded', data.length, 'patrols from Firebase');
+    
+    // Load officers
+    const offSnapshot = await getDocs(collection(window.db, 'officers'));
+    if(!offSnapshot.empty){
+      officers = [];
+      offSnapshot.forEach(doc => {
+        officers.push({ id: doc.id, ...doc.data() });
+      });
+      console.log('📥 Loaded', officers.length, 'officers from Firebase');
+      fillOffSel();
+      showOffList();
+    } else {
+      // First time: sync default officers to Firebase
+      await syncOfficersToFirebase();
+    }
   } catch(e){
     console.error('Firebase load error:', e);
     $('status').textContent = '🔴 Offline';
     $('status').className = 'status offline';
+  }
+}
+
+async function syncOfficersToFirebase(){
+  try {
+    const { collection, addDoc } = window.firestoreModules;
+    for(const officer of officers){
+      if(!officer.id){ // Only add if not yet in Firebase
+        await addDoc(collection(window.db, 'officers'), {
+          name: officer.name,
+          nip: officer.nip
+        });
+      }
+    }
+    console.log('✅ Officers synced to Firebase');
+    await loadFromFirebase(); // Reload to get IDs
+  } catch(e){
+    console.error('Officers sync error:', e);
   }
 }
 
@@ -387,6 +422,8 @@ async function deleteFromFirebase(docId){
   }
 }
 
+let updateTimeout = null;
+
 function startRealtimeListener(){
   if(unsubscribe) unsubscribe();
   
@@ -399,37 +436,28 @@ function startRealtimeListener(){
       data.push({ id: doc.id, ...doc.data() });
     });
     console.log('🔄 Real-time update:', data.length, 'records');
-    if(logged) update();
+    
+    // Debounce UI update to prevent lag
+    if(updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      if(logged) update();
+    }, 300);
+  }, (error) => {
+    console.error('Listener error:', error);
+    $('status').textContent = '🔴 Offline';
+    $('status').className = 'status offline';
   });
 }
 
 // DATA MANAGEMENT
 async function load(){
-  // Load officers from localStorage
-  try {
-    const o = localStorage.getItem('officers');
-    if(o) officers = JSON.parse(o);
-  } catch(e){
-    console.error('Load officers error:', e);
-  }
-  
-  // Load data from Firebase
+  // Load data from Firebase (includes officers)
   await loadFromFirebase();
   
   // Start real-time listener
   startRealtimeListener();
   
-  fillOffSel();
-  showOffList();
   showCps();
-}
-
-function saveOfficers(){
-  try {
-    localStorage.setItem('officers', JSON.stringify(officers));
-  } catch(e){
-    msg('Gagal simpan petugas', 'e');
-  }
 }
 
 // OFFICERS
@@ -479,19 +507,37 @@ function saveOff(){
   const n = $('nn').value.trim();
   const p = $('np').value.trim();
   if(!n || !p){ alert('Nama dan NIP harus diisi'); return; }
-  officers.push({name:n, nip:p});
-  saveOfficers();
-  fillOffSel();
-  showOffList();
+  
+  // Save to Firebase
+  saveOfficerToFirebase({name:n, nip:p});
   cancelOff();
+}
+
+async function saveOfficerToFirebase(officer){
+  try {
+    const { collection, addDoc } = window.firestoreModules;
+    await addDoc(collection(window.db, 'officers'), officer);
+    msg('Petugas ditambahkan ke cloud', 's');
+    await loadFromFirebase(); // Reload
+  } catch(e){
+    msg('Gagal simpan petugas: ' + e.message, 'e');
+  }
 }
 
 function delOff(i){
   if(confirm(`Hapus ${officers[i].name}?`)){
-    officers.splice(i, 1);
-    saveOfficers();
-    fillOffSel();
-    showOffList();
+    deleteOfficerFromFirebase(officers[i].id);
+  }
+}
+
+async function deleteOfficerFromFirebase(docId){
+  try {
+    const { doc, deleteDoc } = window.firestoreModules;
+    await deleteDoc(doc(window.db, 'officers', docId));
+    msg('Petugas dihapus dari cloud', 's');
+    await loadFromFirebase(); // Reload
+  } catch(e){
+    msg('Gagal hapus petugas: ' + e.message, 'e');
   }
 }
 
@@ -538,18 +584,46 @@ function logout(){
 }
 
 // QR SCANNER
+let scannerReady = false;
+let scannerRetries = 0;
+const MAX_RETRIES = 5;
+
+async function initScanner(){
+  if(scannerReady) return true;
+  
+  if(typeof Html5Qrcode === 'undefined'){
+    scannerRetries++;
+    if(scannerRetries < MAX_RETRIES){
+      console.log('Waiting for QR library...', scannerRetries);
+      await new Promise(r => setTimeout(r, 500));
+      return initScanner();
+    } else {
+      msg('Library scanner gagal dimuat. Refresh halaman.', 'e');
+      return false;
+    }
+  }
+  
+  scannerReady = true;
+  return true;
+}
+
 async function startScan(){
   if(qr && qr.isScanning) return;
   
+  // Wait for library
+  const ready = await initScanner();
+  if(!ready) return;
+  
   try {
-    if(typeof Html5Qrcode === 'undefined'){
-      setTimeout(startScan, 500);
-      return;
-    }
+    // Stop existing scanner
     if(qr) {
-      try { await qr.stop(); } catch(e) {}
+      try { 
+        await qr.stop();
+        await new Promise(r => setTimeout(r, 200)); 
+      } catch(e) {}
       qr = null;
     }
+    
     qr = new Html5Qrcode("reader");
     await qr.start(
       {facingMode:"environment"},
@@ -557,17 +631,24 @@ async function startScan(){
       onScanSuccess,
       ()=>{}
     );
+    console.log('✅ Scanner started');
   } catch(e){
     console.error('Scanner error:', e);
-    msg('Scanner tidak bisa start', 'e');
+    msg('Kamera tidak tersedia atau diblokir', 'e');
   }
 }
 
 function onScanSuccess(text){
   const cp = checkpoints.find(c => c.code === text);
-  curLoc = cp ? `${cp.name} (${cp.code})` : text;
+  
+  if(!cp){
+    msg('QR Code tidak valid! Harus TITIK-001 s/d TITIK-012', 'e');
+    return;
+  }
+  
+  curLoc = `${cp.name} (${cp.code})`;
   $('loc').value = curLoc;
-  msg('QR: '+curLoc, 's');
+  msg('✅ QR: '+curLoc, 's');
   stopScan();
   showCam();
 }
@@ -583,14 +664,40 @@ async function stopScan(){
 
 async function showCam(){
   $('cam-sec').classList.remove('hide');
+  
   try {
+    // Stop any existing stream first
+    if(stream){
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+      await new Promise(r => setTimeout(r, 200));
+    }
+    
     stream = await navigator.mediaDevices.getUserMedia({
-      video: {facingMode:"environment", width:{ideal:800}, height:{ideal:600}},
+      video: {
+        facingMode: "environment", 
+        width: {ideal: 1280, max: 1920},
+        height: {ideal: 720, max: 1080}
+      },
       audio: false
     });
-    $('vid').srcObject = stream;
+    
+    const vid = $('vid');
+    vid.srcObject = stream;
+    
+    // Wait for video to be ready
+    await new Promise((resolve, reject) => {
+      vid.onloadedmetadata = () => {
+        vid.play().then(resolve).catch(reject);
+      };
+      setTimeout(() => reject(new Error('Timeout')), 5000);
+    });
+    
+    console.log('✅ Camera started');
   } catch(e){
-    msg('Gagal akses kamera', 'e');
+    console.error('Camera error:', e);
+    msg('Kamera gagal dibuka: ' + e.message, 'e');
+    cancelCam();
   }
 }
 
