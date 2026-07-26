@@ -35,10 +35,11 @@ header{background:linear-gradient(135deg,var(--navy-900),var(--navy-700));color:
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand svg{flex:none}
 .logo-h{height:31px;width:auto;display:block;flex:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+.brand-txt{min-width:0;overflow:hidden}
 .brand-txt h1{font-size:20px;font-weight:800;letter-spacing:.5px;line-height:1.1}
 .brand-txt p{font-size:10.5px;opacity:.85;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hd-right{display:flex;align-items:center;gap:8px;flex:none}
-.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);padding:5px 10px;border-radius:99px;font-size:11.5px;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);padding:5px 9px;border-radius:99px;font-size:11px;font-weight:600}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(16,185,129,.6);animation:pulse 1.8s infinite}
 .dot.off{background:var(--red);animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
@@ -83,7 +84,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
 .scan-wrap::after{bottom:12px;right:12px;border-left:none;border-top:none;border-radius:0 0 6px 0}
 #reader{width:100%}
 #reader video{border-radius:12px}
-.scan-idle{text-align:center;color:var(--muted);padding:30px 20px}
+.scan-idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:24px;z-index:2}
 .scan-idle .big{display:flex;justify-content:center;color:var(--navy-500);margin-bottom:8px}
 .scan-line{position:absolute;left:8%;right:8%;height:2.5px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanmove 2.1s ease-in-out infinite;z-index:6;display:none}
 .scan-wrap.on .scan-line{display:block}
@@ -112,6 +113,36 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
 .stat::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
 .stat b{display:block;font-size:24px;font-weight:800;color:var(--navy-700)}
 .stat span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== STATUS TITIK HARI INI ===== */
+.tp-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tp-item:last-child{border-bottom:none}
+.tp-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none}
+.tp-ic.ok{background:var(--green-soft);color:var(--green)}
+.tp-ic.no{background:#f1f4f8;color:var(--muted)}
+.tp-item b{display:block;font-size:12.5px;line-height:1.3}
+.tp-item .sub{font-size:11px;color:var(--muted)}
+.tp-item .grow{flex:1;min-width:0}
+.tp-badge{flex:none;font-size:10px;font-weight:800;padding:4px 9px;border-radius:99px;letter-spacing:.3px}
+.tp-badge.ok{background:var(--green-soft);color:var(--green)}
+.tp-badge.no{background:var(--red-soft);color:var(--red)}
+
+/* ===== REKAP PER TITIK (ACCORDION) ===== */
+.acc{border:1.5px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden;background:#fff}
+.acc:last-child{margin-bottom:0}
+.acc-h{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;background:#fafcff}
+.acc-h b{flex:1;font-size:12px;min-width:0;line-height:1.3}
+.acc-h .cnt{background:var(--navy-700);color:var(--gold);font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;flex:none}
+.acc-h .chev{transition:.2s;color:var(--muted);flex:none;display:flex}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-b{display:none;border-top:1px solid var(--line);padding:2px 12px 10px}
+.acc.open .acc-b{display:block}
+.acc-date{font-size:10.5px;font-weight:800;color:var(--navy-500);margin:9px 0 3px;text-transform:uppercase;letter-spacing:.4px}
+.acc-row{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:12px}
+.acc-row:last-child{border-bottom:none}
+.acc-row img{width:32px;height:32px;border-radius:7px;object-fit:cover;flex:none;cursor:pointer;border:1px solid var(--line)}
+.acc-row .t{color:var(--muted);flex:none;font-weight:600}
+.acc-row .o{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ===== FILTER ===== */
 .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
@@ -295,6 +326,16 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     </div>
 
     <div class="card">
+      <h2>Kontrol Hari Ini — 5 Titik</h2>
+      <div id="todayTitik"></div>
+    </div>
+
+    <div class="card">
+      <h2>Rekap Per Titik — Hari Sebelumnya</h2>
+      <div id="rekapTitik"></div>
+    </div>
+
+    <div class="card">
       <h2>Filter Data</h2>
       <div class="filter-grid">
         <div class="field full" style="margin:0"><label>Tanggal</label><input type="date" id="fDate"></div>
@@ -362,7 +403,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     </div>
   </div>
 </section>
-<p class="ver">SAKTI v2.1 • Verifikasi lokasi hanya via QR resmi</p>
+<p class="ver">SAKTI v2.2 • Verifikasi lokasi hanya via QR resmi</p>
 </main>
 
 <!-- ================= LOGIN MODAL ================= -->
@@ -424,12 +465,13 @@ const USERS = {
 };
 
 /* --- 3. TITIK PATROLI ----------------------------------------- */
+/* Kode di bawah SAMA dengan QR fisik yang sudah dicetak & dipasang di lapangan */
 const TITIK = [
-  { kode: "TITIK-001", nama: "Area Samping Klinik" },
-  { kode: "TITIK-002", nama: "Area Laundry" },
-  { kode: "TITIK-003", nama: "Area Belakang Green House Melon dalam Lapas" },
-  { kode: "TITIK-004", nama: "Area Kolam Belakang Masjid" },
-  { kode: "TITIK-005", nama: "Area Ayam Petelur Brandgang Lapas" }
+  { kode: "SAKTI-TITIK-001", nama: "Area Samping Klinik" },
+  { kode: "SAKTI-TITIK-002", nama: "Area Laundry" },
+  { kode: "SAKTI-TITIK-003", nama: "Area Belakang Green House Melon dalam Lapas" },
+  { kode: "SAKTI-TITIK-004", nama: "Area Kolam Belakang Masjid" },
+  { kode: "SAKTI-TITIK-005", nama: "Area Ayam Petelur Brandgang Lapas" }
 ];
 
 /* --- 4. LOGO INSTANSI (otomatis, jangan diubah) --------------- */
@@ -469,7 +511,8 @@ useradd:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy=
 img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
 print:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
 clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-alert:'<path d="m10.29 3.86-8.4 14.5A2 2 0 0 0 3.62 21h16.76a2 2 0 0 0 1.73-2.64l-8.4-14.5a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+alert:'<path d="m10.29 3.86-8.4 14.5A2 2 0 0 0 3.62 21h16.76a2 2 0 0 0 1.73-2.64l-8.4-14.5a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+chev:'<polyline points="6 9 12 15 18 9"/>'
 };
 function icSVG(n,sz){sz=sz||18;return '<svg class="li" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24">'+(ICON[n]||'')+'</svg>';}
 function renderIcons(){document.querySelectorAll('[data-ic]').forEach(el=>{el.innerHTML=icSVG(el.dataset.ic, el.dataset.sz);});}
@@ -571,10 +614,12 @@ function buildTitik(){
 /* ---------- SCANNER ---------- */
 let scanKode="", scanLokasi="", lastScanErr=0;
 function resolveScan(text){
-  const t=text.trim();
-  let hit=TITIK.find(x=>x.kode.toLowerCase()===t.toLowerCase());
-  if(!hit) hit=TITIK.find(x=>x.nama.toLowerCase()===t.toLowerCase());
-  return hit||null;  // QR tak terdaftar = DITOLAK
+  const t=text.trim().toUpperCase().replace(/\s+/g," ");
+  // Terima: SAKTI-TITIK-001, TITIK-001, TITIK 1, dst.
+  const m=t.match(/TITIK[-\s]?0*([1-9]\d{0,2})/);
+  if(m){ const n=+m[1]; if(n>=1&&n<=TITIK.length) return TITIK[n-1]; }
+  return TITIK.find(x=>{ const N=x.nama.toUpperCase(); return t===N||(N.indexOf(t)===0&&t.length>=10); })||null;
+  // QR di luar 5 titik resmi = DITOLAK
 }
 $("btnStartScan").onclick = async ()=>{
   if(scanning) return;
@@ -661,12 +706,59 @@ function refreshDash(){
   const now=new Date();
   const today=allRecords.filter(r=>sameDay(getTime(r),now));
   $("statToday").textContent=today.length;
-  $("statLokasi").textContent=new Set(today.map(r=>gf(r,["location","lokasi","titik"]))).size+"/"+TITIK.length;
+  $("statLokasi").textContent=new Set(today.map(r=>{const t=titikOf(r);return t?t.kode:null;}).filter(Boolean)).size+"/"+TITIK.length;
   $("statPetugas").textContent=new Set(today.map(r=>gf(r,["officer","petugas","nama"]))).size;
   $("statTotal").textContent=allRecords.length;
   $("cloudTotal").textContent=allRecords.length;
   fillLokasiFilter();
+  renderTodayTitik();
+  renderRekapTitik();
   applyFilter(false);
+}
+function titikOf(r){
+  const s=((gf(r,["kode"],"")+" "+gf(r,["location","lokasi","titik"],""))+"").toUpperCase();
+  const m=s.match(/TITIK[-\s]?0*([1-9]\d{0,2})/);
+  if(m){ const n=+m[1]; if(n>=1&&n<=TITIK.length) return TITIK[n-1]; }
+  return TITIK.find(t=>s.includes(t.nama.toUpperCase()))||null;
+}
+const fmtJam=d=>new Intl.DateTimeFormat("id-ID",{hour:"2-digit",minute:"2-digit"}).format(d);
+function renderTodayTitik(){
+  const box=$("todayTitik"); if(!box) return;
+  const now=new Date();
+  const today=allRecords.filter(r=>sameDay(getTime(r),now));
+  box.innerHTML=TITIK.map((t,i)=>{
+    const recs=today.filter(r=>titikOf(r)===t);
+    const ok=recs.length>0, last=recs[0];
+    const sub=ok?`${recs.length}x • terakhir ${fmtJam(getTime(last))} • ${gf(last,["officer","petugas","nama"],"-")}`:"Belum dikontrol hari ini";
+    return `<div class="tp-item">
+      <div class="tp-ic ${ok?"ok":"no"}">${icSVG(ok?"check":"clock",18)}</div>
+      <div class="grow"><b>Titik ${i+1} — ${t.nama}</b><span class="sub">${sub}</span></div>
+      <span class="tp-badge ${ok?"ok":"no"}">${ok?"DIKONTROL":"BELUM"}</span>
+    </div>`;
+  }).join("");
+}
+let accOpen={};
+function toggleAcc(i){ accOpen[i]=!accOpen[i]; renderRekapTitik(); }
+function renderRekapTitik(){
+  const box=$("rekapTitik"); if(!box) return;
+  const now=new Date();
+  const past=allRecords.filter(r=>{ const d=getTime(r); return d&&!sameDay(d,now); });
+  box.innerHTML=TITIK.map((t,i)=>{
+    const recs=past.filter(r=>titikOf(r)===t);
+    const byDate={};
+    recs.forEach(r=>{ const k=new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"2-digit",month:"short",year:"numeric"}).format(getTime(r)); (byDate[k]=byDate[k]||[]).push(r); });
+    const body=Object.keys(byDate).map(k=>
+      `<div class="acc-date">${k} • ${byDate[k].length}x</div>`+
+      byDate[k].map(r=>{
+        const foto=gf(r,["photo","foto","image","img","fotoBase64"]);
+        return `<div class="acc-row">${foto?`<img src="${foto}" onclick="openPhoto(this.src)" alt="">`:""}<span class="t">${fmtJam(getTime(r))}</span><span class="o">${gf(r,["officer","petugas","nama"],"-")}</span></div>`;
+      }).join("")
+    ).join("");
+    return `<div class="acc ${accOpen[i]?"open":""}">
+      <div class="acc-h" onclick="toggleAcc(${i})"><b>Titik ${i+1} — ${t.nama}</b><span class="cnt">${recs.length}</span><span class="chev">${icSVG("chev",16)}</span></div>
+      <div class="acc-b">${recs.length?body:'<div class="empty" style="padding:10px 0">Belum ada data hari sebelumnya.</div>'}</div>
+    </div>`;
+  }).join("");
 }
 function fillLokasiFilter(){
   const f=$("fLokasi"); const cur=f.value;
