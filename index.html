@@ -2,241 +2,408 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>SAKTI - Sistem Patroli Lapas Banyuasin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SAKTI — Sistem Patroli Lapas Kelas IIA Banyuasin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{overscroll-behavior:none}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#1e3c72;min-height:100vh;padding:8px;color:#333}
-.wrap{max-width:1100px;margin:0 auto}
-.hdr{background:#fff;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;position:relative}
-.hdr h1{color:#1e3c72;font-size:18px}
-.hdr p{color:#666;font-size:12px;margin-top:3px}
-.status{position:absolute;top:12px;right:12px;font-size:11px;padding:4px 8px;border-radius:12px;font-weight:600}
-.status.online{background:#d4edda;color:#155724}
-.status.offline{background:#f8d7da;color:#721c24}
-.tabs{display:flex;gap:4px;margin-bottom:10px}
-.tab{flex:1;padding:10px 4px;border:0;background:#fff;color:#1e3c72;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer}
-.tab.on{background:#1e3c72;color:#fff}
-.pg{display:none}
-.pg.on{display:block}
-.box{background:#fff;padding:12px;border-radius:8px;margin-bottom:10px}
-.box h2{color:#1e3c72;font-size:16px;border-bottom:2px solid #1e3c72;padding-bottom:6px;margin-bottom:12px}
-#reader{border-radius:6px;overflow:hidden;margin-bottom:10px;min-height:240px;background:#000}
-#vid{width:100%;max-width:360px;border-radius:6px;margin:8px auto;display:block;background:#000}
-.fg{margin-bottom:10px}
-.fg label{display:block;margin-bottom:4px;font-weight:600;font-size:13px}
-.fg input,.fg select{width:100%;padding:9px;border:2px solid #ddd;border-radius:5px;font-size:15px}
-.btn{padding:10px 16px;border:0;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;margin:3px;min-height:42px;-webkit-user-select:none;user-select:none;transition:opacity .15s}
-.btn:active{opacity:0.6}
-.btn:disabled{opacity:0.5;cursor:not-allowed}
-.bp{background:#1e3c72;color:#fff}
-.bs{background:#28a745;color:#fff}
-.bd{background:#dc3545;color:#fff}
-.bw{background:#ffc107;color:#000}
-.msg{padding:10px;border-radius:5px;margin-bottom:10px;display:none;font-size:13px}
-.ms{background:#d4edda;color:#155724}
-.me{background:#f8d7da;color:#721c24}
-.mi{background:#d1ecf1;color:#0c5460}
-.rec{background:#f8f9fa;padding:10px;border-radius:5px;margin-bottom:8px;border-left:3px solid #1e3c72}
-.rec h3{color:#1e3c72;font-size:14px;margin-bottom:5px}
-.rec p{margin:2px 0;color:#555;font-size:12px}
-.rec img{max-width:100%;border-radius:5px;margin-top:6px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:10px}
-.stat{background:#1e3c72;color:#fff;padding:10px;border-radius:6px;text-align:center}
-.stat h3{font-size:22px}
-.stat p{font-size:11px;margin-top:2px}
-.flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px}
-#photo{max-width:100%;border-radius:5px;margin-top:8px;display:none}
-.lgn{max-width:340px;margin:30px auto;background:#fff;padding:18px;border-radius:8px}
-.lgn h2{text-align:center;color:#1e3c72;margin-bottom:12px}
-.cps{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
-.cp{background:#f8f9fa;padding:8px;border-radius:5px;border-left:3px solid #1e3c72}
-.cp h3{color:#1e3c72;font-size:13px;margin-bottom:3px}
-.cp p{color:#666;font-size:11px}
-.cp code{background:#e9ecef;padding:2px 4px;border-radius:3px;font-size:11px}
+:root{
+  --navy-900:#0f2438; --navy-700:#16324f; --navy-500:#1e4266; --navy-100:#e6edf5;
+  --gold:#d4af37; --gold-soft:#f6ecc9;
+  --green:#0f9d6a; --green-soft:#e2f6ee;
+  --red:#e04545; --red-soft:#fdeaea;
+  --amber:#e8a020;
+  --bg:#eef2f7; --card:#ffffff; --line:#dde5ee;
+  --ink:#182635; --muted:#5c6b7c;
+  --radius:14px; --shadow:0 6px 24px rgba(15,36,56,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select{font-family:inherit;font-size:15px;width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus{border-color:var(--navy-500)}
 .hide{display:none!important}
-.usr{background:#e3f2fd;padding:8px;border-radius:5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.usr span{color:#1e3c72;font-weight:600;font-size:13px}
-.spn{display:inline-block;width:12px;height:12px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:s 0.7s linear infinite;vertical-align:middle;margin-right:5px}
-@keyframes s{to{transform:rotate(360deg)}}
-.empty{text-align:center;color:#999;padding:20px;font-size:13px}
-hr{border:0;border-top:2px solid #e9ecef;margin:15px 0}
+svg.li{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+[data-ic]{display:inline-flex;align-items:center;justify-content:center;flex:none}
+.gold-ic{color:var(--gold)}
+.muted{color:var(--muted)}
+
+/* ===== HEADER ===== */
+header{background:linear-gradient(135deg,var(--navy-900),var(--navy-700));color:#fff;padding:14px 16px 12px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:50}
+.hd-row{display:flex;align-items:center;justify-content:space-between;max-width:920px;margin:0 auto;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.logo-h{height:31px;width:auto;display:block;flex:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+.brand-txt h1{font-size:20px;font-weight:800;letter-spacing:.5px;line-height:1.1}
+.brand-txt p{font-size:10.5px;opacity:.85;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd-right{display:flex;align-items:center;gap:8px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);padding:5px 10px;border-radius:99px;font-size:11.5px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(16,185,129,.6);animation:pulse 1.8s infinite}
+.dot.off{background:var(--red);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.chip-admin{background:var(--gold);color:var(--navy-900);font-weight:800;font-size:10.5px;padding:4px 9px;border-radius:99px;letter-spacing:.4px}
+.btn-auth{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);padding:7px 13px;border-radius:9px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+
+/* ===== TABS ===== */
+nav{position:sticky;top:64px;z-index:40;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(15,36,56,.05)}
+.tabs{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{background:none;padding:11px 4px 9px;font-size:12px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;border-bottom:3px solid transparent;transition:.15s}
+.tab .ico{display:flex}
+.tab.active{color:var(--navy-700);border-bottom-color:var(--gold)}
+
+/* ===== LAYOUT ===== */
+main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
+.tabpage{display:none;animation:fadein .25s ease}
+.tabpage.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.card h2::before{content:"";width:4px;height:18px;background:var(--gold);border-radius:2px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:5px}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:700;transition:.15s;width:100%}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--navy-700);color:#fff}
+.btn-primary:hover{background:var(--navy-900)}
+.btn-gold{background:var(--gold);color:var(--navy-900)}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-soft-danger{background:var(--red-soft);color:var(--red);border:1.5px solid #f5c6c6}
+.btn-sm{padding:8px 12px;font-size:12.5px;width:auto}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ===== SCANNER ===== */
+.scan-wrap{position:relative;background:var(--navy-100);border-radius:12px;overflow:hidden;min-height:230px;display:flex;align-items:center;justify-content:center}
+.scan-wrap::before,.scan-wrap::after{content:"";position:absolute;width:34px;height:34px;border:3px solid var(--gold);z-index:5;pointer-events:none}
+.scan-wrap::before{top:12px;left:12px;border-right:none;border-bottom:none;border-radius:6px 0 0 0}
+.scan-wrap::after{bottom:12px;right:12px;border-left:none;border-top:none;border-radius:0 0 6px 0}
+#reader{width:100%}
+#reader video{border-radius:12px}
+.scan-idle{text-align:center;color:var(--muted);padding:30px 20px}
+.scan-idle .big{display:flex;justify-content:center;color:var(--navy-500);margin-bottom:8px}
+.scan-line{position:absolute;left:8%;right:8%;height:2.5px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanmove 2.1s ease-in-out infinite;z-index:6;display:none}
+.scan-wrap.on .scan-line{display:block}
+@keyframes scanmove{0%,100%{top:16%}50%{top:82%}}
+.badge-loc{display:none;align-items:center;gap:8px;background:var(--green-soft);color:var(--green);border:1.5px solid #bfe8d6;padding:10px 13px;border-radius:10px;font-size:13.5px;font-weight:700;margin-top:12px}
+.badge-loc.show{display:flex}
+.loc-display{display:flex;align-items:center;gap:9px;padding:12px 13px;border:1.5px dashed var(--line);border-radius:10px;background:#fafcfe;color:var(--muted);font-size:13.5px;font-weight:600}
+.loc-display.ok{border-style:solid;border-color:#bfe8d6;background:var(--green-soft);color:var(--green)}
+
+/* ===== FOTO ===== */
+.foto-box{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;background:#fafcfe}
+#imgPreview{max-width:100%;max-height:240px;border-radius:10px;display:none;margin:0 auto 10px}
+.foto-empty{color:var(--muted);font-size:13px;padding:14px 0}
+.foto-empty .big{display:flex;justify-content:center;color:var(--muted);margin-bottom:6px}
+
+/* ===== LOCK ===== */
+.lock{text-align:center;padding:36px 20px}
+.lock .big{display:flex;justify-content:center;color:var(--navy-500);margin-bottom:12px}
+.lock h3{font-size:17px;font-weight:800;margin-bottom:6px}
+.lock p{font-size:13.5px;color:var(--muted);margin-bottom:18px}
+.lock .btn{max-width:240px;margin:0 auto}
+
+/* ===== STATS ===== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px 8px;text-align:center;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.stat b{display:block;font-size:24px;font-weight:800;color:var(--navy-700)}
+.stat span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== FILTER ===== */
+.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.filter-grid .full{grid-column:1/-1}
+
+/* ===== HISTORY ===== */
+.hist-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.hist-item:last-child{border-bottom:none}
+.hist-thumb{width:58px;height:58px;border-radius:10px;object-fit:cover;background:var(--navy-100);flex:none;cursor:pointer;border:1.5px solid var(--line)}
+.hist-thumb.noimg{display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--muted)}
+.hist-info{flex:1;min-width:0}
+.hist-info b{display:block;font-size:14px}
+.hist-info .loc{font-size:12.5px;color:var(--navy-500);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.hist-info .time{font-size:11.5px;color:var(--muted)}
+.btn-del{flex:none;width:36px;height:36px;border-radius:9px;background:var(--red-soft);color:var(--red);font-size:15px;display:flex;align-items:center;justify-content:center}
+.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:26px 10px}
+
+/* ===== TITIK ===== */
+.titik-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.titik-card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:14px;text-align:center}
+.titik-card .kode{display:inline-block;background:var(--navy-700);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.7px;padding:4px 10px;border-radius:99px;margin-bottom:8px}
+.titik-card .qr{display:flex;justify-content:center;margin:6px 0 8px}
+.titik-card .qr img,.titik-card .qr canvas{border:6px solid #fff;border-radius:6px;box-shadow:0 2px 8px rgba(15,36,56,.12)}
+.titik-card .nm{font-size:12px;font-weight:700;line-height:1.35;min-height:32px}
+
+/* ===== SETTING ===== */
+.petugas-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+.petugas-item:last-child{border-bottom:none}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--navy-100);color:var(--navy-700);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.petugas-item b{display:block;font-size:13.5px}
+.petugas-item span{font-size:11.5px;color:var(--muted)}
+.petugas-item .grow{flex:1;min-width:0}
+.info-line{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.info-line:last-child{border-bottom:none}
+.info-line b{color:var(--navy-700)}
+.danger-zone{border:1.5px solid #f5c6c6;background:#fffafa}
+.danger-zone h2::before{background:var(--red)}
+
+/* ===== MODAL ===== */
+.overlay{position:fixed;inset:0;background:rgba(15,36,56,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px 20px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:pop .2s ease}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.modal h3{font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}
+.modal .sub{text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.modal-logos{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:13px}
+.modal-logos img{height:54px;width:auto}
+.ver{text-align:center;font-size:10.5px;color:var(--muted);margin-top:4px;font-weight:600;letter-spacing:.3px}
+.login-err{display:none;background:var(--red-soft);color:var(--red);font-size:12.5px;font-weight:600;padding:9px 12px;border-radius:9px;margin-bottom:10px;text-align:center}
+.login-err.show{display:block}
+#photoModal img{max-width:92vw;max-height:82vh;border-radius:12px}
+#photoModal .modal-x{position:absolute;top:16px;right:18px;background:rgba(255,255,255,.15);color:#fff;width:38px;height:38px;border-radius:50%;font-size:17px}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-900);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;font-weight:600;z-index:200;opacity:0;transition:.3s;max-width:88vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.ok{background:var(--green)}
+#toast.err{background:var(--red)}
+
+/* ===== BANNER ===== */
+.banner-warn{background:#fff7e0;border:1.5px solid #f0d98a;color:#7a5c00;font-size:12.5px;font-weight:600;padding:11px 14px;border-radius:11px;margin-bottom:14px;line-height:1.5;display:flex;gap:9px;align-items:flex-start}
+
+/* ===== PRINT ===== */
+#printArea{display:none}
+@media print{
+  body>*{display:none!important}
+  #printArea{display:block!important}
+  .pr-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:10px}
+  .pr-card{border:2.5px solid #16324f;border-radius:12px;padding:18px;text-align:center;page-break-inside:avoid}
+  .pr-card .k{font-size:15px;font-weight:800;letter-spacing:1px;color:#16324f}
+  .pr-logos{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:10px}
+  .pr-logos img{height:42px;width:auto}
+  .pr-card .n{font-size:12px;font-weight:700;margin:6px 0 12px}
+  .pr-card .qr{display:flex;justify-content:center;margin-bottom:12px}
+  .pr-card .f{font-size:9.5px;color:#666;border-top:1px solid #ddd;padding-top:8px}
+}
+
+@media (max-width:520px){
+  .titik-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  nav{top:62px}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<!-- LOGIN -->
-<div id="login" class="hide">
-<div class="lgn">
-<h2>🔐 Login SAKTI</h2>
-<p style="text-align:center;font-size:11px;color:#666;margin-bottom:12px">Dashboard Ka.KPLP</p>
-<div id="lmsg" class="msg"></div>
-<div class="fg"><label>Username:</label><input id="u" type="text"></div>
-<div class="fg"><label>Password:</label><input id="p" type="password"></div>
-<button class="btn bp" style="width:100%" onclick="doLogin()">Login</button>
-<button class="btn bw" style="width:100%;margin-top:6px" onclick="cancelLogin()">Kembali</button>
-</div>
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="hd-row">
+    <div class="brand">
+      <img class="logo-h" data-logo="kemen" alt="Kemenimipas">
+      <img class="logo-h" data-logo="pas" alt="Pemasyarakatan">
+      <div class="brand-txt">
+        <h1>SAKTI</h1>
+        <p>Lapas Kelas IIA Banyuasin</p>
+      </div>
+    </div>
+    <div class="hd-right">
+      <span class="pill"><span class="dot" id="netDot"></span><span id="netTxt">Online</span></span>
+      <span class="chip-admin hide" id="chipAdmin">ADMIN</span>
+      <button class="btn-auth" id="btnAuth">Login</button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= TABS ================= -->
+<nav>
+  <div class="tabs">
+    <button class="tab active" data-tab="patroli"><span class="ico" data-ic="scan" data-sz="20"></span>Patroli</button>
+    <button class="tab" data-tab="dashboard"><span class="ico" data-ic="chart" data-sz="20"></span>Dashboard</button>
+    <button class="tab" data-tab="titik"><span class="ico" data-ic="pin" data-sz="20"></span>Titik</button>
+    <button class="tab" data-tab="setting"><span class="ico" data-ic="gear" data-sz="20"></span>Setting</button>
+  </div>
+</nav>
+
+<main>
+<div class="banner-warn hide" id="configWarn"><span data-ic="alert" data-sz="18" style="margin-top:1px"></span><div><b>Firebase belum dikonfigurasi.</b> Buka file ini, cari tulisan <b>FIREBASE CONFIG</b>, lalu tempel config dari file lama Anda agar data tersambung.</div></div>
+
+<!-- ================= TAB: PATROLI ================= -->
+<section class="tabpage active" id="tab-patroli">
+  <div class="card">
+    <h2>Scan QR Titik Patroli</h2>
+    <div class="scan-wrap" id="scanWrap">
+      <div class="scan-line"></div>
+      <div id="reader"></div>
+      <div class="scan-idle" id="scanIdle">
+        <div class="big" data-ic="camera" data-sz="44"></div>
+        <b>Kamera belum aktif</b><br>
+        <span style="font-size:12.5px">Tekan tombol di bawah untuk mulai memindai QR Code di titik patroli</span>
+      </div>
+    </div>
+    <div class="badge-loc" id="badgeLoc"><span data-ic="check" data-sz="17"></span><span id="badgeLocTxt"></span></div>
+    <div class="row2" style="margin-top:12px">
+      <button class="btn btn-primary" id="btnStartScan"><span data-ic="play" data-sz="17"></span>Mulai Scan</button>
+      <button class="btn btn-ghost" id="btnStopScan"><span data-ic="stop" data-sz="17"></span>Stop</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Laporan Patroli</h2>
+    <div class="field">
+      <label>Petugas</label>
+      <select id="selPetugas"><option value="">-- Pilih Petugas --</option></select>
+    </div>
+    <div class="field">
+      <label>Lokasi / Titik <span style="font-weight:600;color:var(--gold);text-transform:none">— hanya via QR resmi</span></label>
+      <div class="loc-display" id="locDisplay"><span data-ic="pin" data-sz="17"></span><span id="locText">Belum discan — pindai QR di titik patroli</span></div>
+    </div>
+    <div class="field">
+      <label>Foto Bukti Patroli</label>
+      <div class="foto-box">
+        <img id="imgPreview" alt="Preview foto">
+        <div class="foto-empty" id="fotoEmpty"><span class="big" data-ic="img" data-sz="34"></span>Belum ada foto</div>
+        <label class="btn btn-ghost" style="max-width:220px;margin:0 auto">
+          <span data-ic="camera" data-sz="17"></span>Ambil Foto
+          <input type="file" id="fileFoto" accept="image/*" capture="environment" style="display:none">
+        </label>
+      </div>
+    </div>
+    <button class="btn btn-gold" id="btnSimpan"><span data-ic="save" data-sz="17"></span>Simpan ke Cloud</button>
+    <button class="btn btn-ghost" id="btnBatal" style="margin-top:8px"><span data-ic="x" data-sz="16"></span>Batal / Reset</button>
+  </div>
+</section>
+
+<!-- ================= TAB: DASHBOARD ================= -->
+<section class="tabpage" id="tab-dashboard">
+
+  <div class="card lock" id="dashLock">
+    <div class="big" data-ic="lock" data-sz="46"></div>
+    <h3>Akses Terbatas</h3>
+    <p>Dashboard hanya untuk Ka.KPLP dan Administrator.</p>
+    <button class="btn btn-primary" onclick="openLogin()"><span data-ic="lock" data-sz="16"></span>Login</button>
+  </div>
+
+  <div id="dashContent" class="hide">
+    <div class="stats">
+      <div class="stat"><b id="statToday">0</b><span>Hari Ini</span></div>
+      <div class="stat"><b id="statLokasi">0/5</b><span>Lokasi</span></div>
+      <div class="stat"><b id="statPetugas">0</b><span>Petugas</span></div>
+      <div class="stat"><b id="statTotal">0</b><span>Total</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Filter Data</h2>
+      <div class="filter-grid">
+        <div class="field full" style="margin:0"><label>Tanggal</label><input type="date" id="fDate"></div>
+        <div class="field" style="margin:0"><label>Lokasi</label><select id="fLokasi"><option value="">Semua</option></select></div>
+        <div class="field" style="margin:0"><label>Petugas</label><select id="fPetugas"><option value="">Semua</option></select></div>
+      </div>
+      <div class="row2">
+        <button class="btn btn-primary btn-sm" id="btnFilter" style="width:100%"><span data-ic="search" data-sz="15"></span>Terapkan</button>
+        <button class="btn btn-ghost btn-sm" id="btnResetFilter" style="width:100%"><span data-ic="refresh" data-sz="15"></span>Reset</button>
+      </div>
+      <button class="btn btn-gold admin-only hide" id="btnExport" style="margin-top:10px"><span data-ic="pdf" data-sz="17"></span>Export PDF <span style="font-size:10.5px;opacity:.75">(Admin)</span></button>
+    </div>
+
+    <div class="card">
+      <h2>Riwayat Patroli <span class="muted" style="font-weight:600;font-size:12.5px" id="histCount"></span></h2>
+      <div id="historyList"><div class="empty">Belum ada data.</div></div>
+      <button class="btn btn-ghost hide" id="btnMore" style="margin-top:10px">Tampilkan Lebih Banyak</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB: TITIK ================= -->
+<section class="tabpage" id="tab-titik">
+  <div class="card">
+    <h2>Titik Patroli &amp; QR Code</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">QR Code di bawah otomatis dibuat oleh sistem. Cetak lalu tempel di masing-masing titik patroli.</p>
+    <button class="btn btn-primary" onclick="window.print()"><span data-ic="print" data-sz="17"></span>Cetak Semua QR Code</button>
+  </div>
+  <div class="titik-grid" id="titikGrid"></div>
+</section>
+
+<!-- ================= TAB: SETTING ================= -->
+<section class="tabpage" id="tab-setting">
+
+  <div class="card lock" id="setLock">
+    <div class="big" data-ic="shield" data-sz="46"></div>
+    <h3>Khusus Administrator</h3>
+    <p>Pengaturan sistem, penambahan petugas, dan penghapusan data hanya dapat dilakukan oleh Admin.</p>
+    <button class="btn btn-primary" onclick="openLogin()"><span data-ic="lock" data-sz="16"></span>Login Admin</button>
+  </div>
+
+  <div id="setContent" class="hide">
+    <div class="card">
+      <h2>Kelola Petugas</h2>
+      <div class="field"><label>Nama Petugas</label><input type="text" id="inpNama" placeholder="Contoh: Ariel Utama Putra"></div>
+      <div class="field"><label>NIP (opsional)</label><input type="text" id="inpNip" placeholder="Contoh: 200508242025061003"></div>
+      <button class="btn btn-gold" id="btnAddPetugas"><span data-ic="useradd" data-sz="17"></span>Tambah Petugas</button>
+      <div id="petugasList" style="margin-top:14px"><div class="empty">Belum ada petugas.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Status Cloud</h2>
+      <div class="info-line"><span>Database</span><b>Firebase Firestore</b></div>
+      <div class="info-line"><span>Penyimpanan Foto</span><b>Base64 (Firestore)</b></div>
+      <div class="info-line"><span>Koleksi Data</span><b id="cloudCol">-</b></div>
+      <div class="info-line"><span>Total Records</span><b id="cloudTotal">0</b></div>
+      <div class="info-line"><span>Kebijakan</span><b>Hapus manual &gt; 30 hari</b></div>
+    </div>
+
+    <div class="card danger-zone">
+      <h2>Manajemen Data</h2>
+      <button class="btn btn-soft-danger" id="btnClean30"><span data-ic="clock" data-sz="16"></span>Hapus Data Lama (&gt; 30 hari)</button>
+      <button class="btn btn-danger" id="btnWipe" style="margin-top:10px"><span data-ic="trash" data-sz="16"></span>Hapus SEMUA Data</button>
+      <p style="font-size:11.5px;color:var(--muted);margin-top:10px">Penghapusan bersifat permanen dan tidak dapat dibatalkan.</p>
+    </div>
+  </div>
+</section>
+<p class="ver">SAKTI v2.1 • Verifikasi lokasi hanya via QR resmi</p>
+</main>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div class="overlay" id="loginModal">
+  <div class="modal">
+    <div class="modal-logos"><img data-logo="kemen" alt=""><img data-logo="pas" alt=""></div>
+    <h3><span data-ic="lock" data-sz="18"></span>Login SAKTI</h3>
+    <p class="sub">Masuk sebagai Administrator atau Ka.KPLP</p>
+    <div class="login-err" id="loginErr">Username atau password salah.</div>
+    <div class="field"><label>Username</label><input type="text" id="inpUser" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input type="password" id="inpPass"></div>
+    <button class="btn btn-primary" id="btnLogin">Masuk</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeLogin()">Batal</button>
+  </div>
 </div>
 
-<!-- MAIN -->
-<div id="main">
-<div class="hdr">
-<h1>🛡️ SAKTI</h1>
-<p style="font-size:10px;line-height:1.3;margin-top:5px;max-width:600px;margin-left:auto;margin-right:auto">Sistem Pemetaan dan Pengawasan untuk Transparansi dan Akuntabilitas Patroli Pengamanan di Lapas Kelas IIA Banyuasin</p>
-<span class="status online" id="status">🟢 Online</span>
+<!-- ================= PHOTO MODAL ================= -->
+<div class="overlay" id="photoModal" onclick="this.classList.remove('show')">
+  <button class="modal-x">✕</button>
+  <img id="photoModalImg" alt="Foto patroli">
 </div>
 
-<div class="tabs">
-<button class="tab on" onclick="tab('p')">📱 Patroli</button>
-<button class="tab" onclick="tab('d')">📊 Dashboard</button>
-<button class="tab" onclick="tab('c')">📍 Titik</button>
-<button class="tab" onclick="tab('s')">⚙️ Setting</button>
-</div>
+<div id="toast"></div>
+<div id="printArea"><div class="pr-grid" id="prGrid"></div></div>
 
-<!-- PATROLI -->
-<div id="tab-p" class="pg on">
-<div class="box">
-<h2>Scan QR Code</h2>
-<div id="msg" class="msg"></div>
+<!-- ================= LIBRARIES ================= -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<div id="scan-sec">
-<div id="reader"></div>
-<div style="margin-top:8px">
-<button class="btn bs" id="btn-start-scan" onclick="startScanManual()">▶️ Start Scanner</button>
-<button class="btn bd" id="btn-stop-scan" onclick="stopScan()" style="display:none">⏹️ Stop Scanner</button>
-</div>
-</div>
+<script>
+/* ============================================================
+   ██  KONFIGURASI — EDIT BAGIAN INI SAJA  ██
+   ============================================================ */
 
-<div id="cam-sec" class="hide">
-<div class="fg">
-<label>Petugas:</label>
-<select id="off"><option value="">-- Pilih Petugas --</option></select>
-</div>
-<div class="fg">
-<label>Lokasi:</label>
-<input id="loc" readonly>
-</div>
-<div style="margin-bottom:12px">
-<button class="btn bp" id="btn-cam" onclick="openCamera()">📷 Buka Kamera</button>
-</div>
-<p style="font-weight:600;margin-bottom:6px;font-size:13px" id="lbl-foto" class="hide">Foto:</p>
-<video id="vid" autoplay playsinline muted style="display:none"></video>
-<div style="text-align:center"><img id="photo"></div>
-<div style="margin-top:12px">
-<button class="btn bp hide" id="btn-photo" onclick="takePhoto()">📸 Ambil Foto</button>
-<button class="btn bs" id="btn-save" onclick="savePat()">💾 Simpan ke Cloud</button>
-<button class="btn bd" onclick="cancelCam()">❌ Batal</button>
-</div>
-</div>
-</div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="tab-d" class="pg">
-<div id="lock" class="box">
-<h2>🔒 Akses Terbatas</h2>
-<p class="empty">Dashboard hanya untuk Ka.KPLP</p>
-<div style="text-align:center"><button class="btn bp" onclick="showLogin()">🔐 Login</button></div>
-</div>
-
-<div id="dash" class="hide">
-<div class="usr">
-<span>👤 <strong>Ka.KPLP</strong></span>
-<div>
-<button class="btn bp" style="padding:6px 12px;margin:0 3px;min-height:32px" onclick="refreshData()">🔄 Refresh</button>
-<button class="btn bd" style="padding:6px 12px;margin:0;min-height:32px" onclick="logout()">Logout</button>
-</div>
-</div>
-
-<div class="box">
-<h2>Statistik Real-time</h2>
-<div class="stats">
-<div class="stat"><h3 id="t1">0</h3><p>Hari Ini</p></div>
-<div class="stat"><h3 id="t2">0</h3><p>Lokasi</p></div>
-<div class="stat"><h3 id="t3">0</h3><p>Petugas</p></div>
-<div class="stat"><h3 id="t4">0</h3><p>Total</p></div>
-</div>
-</div>
-
-<div class="box">
-<h2>Filter</h2>
-<div class="flt">
-<div class="fg"><label>Tanggal:</label><input id="fd" type="date"></div>
-<div class="fg"><label>Lokasi:</label><select id="fl"><option value="">Semua</option></select></div>
-<div class="fg"><label>Petugas:</label><select id="fo"><option value="">Semua</option></select></div>
-</div>
-<button class="btn bp" onclick="filter()">🔍 Filter</button>
-<button class="btn bs" id="btn-pdf" onclick="exportPDF()">📄 Export PDF</button>
-</div>
-
-<div class="box">
-<h2>Riwayat (<span id="rcnt">0</span>)</h2>
-<div id="hist"></div>
-<div style="text-align:center;margin-top:12px">
-<button class="btn bp hide" id="more" onclick="loadMore()">Tampilkan Lebih Banyak</button>
-</div>
-</div>
-</div>
-</div>
-
-<!-- TITIK -->
-<div id="tab-c" class="pg">
-<div class="box">
-<h2>📍 Titik Patroli</h2>
-<div id="cps" class="cps"></div>
-</div>
-<div class="box">
-<h2>📄 Buat QR Code</h2>
-<ol style="line-height:1.8;color:#555;font-size:13px;padding-left:20px">
-<li>Buka <a href="https://www.qr-code-generator.com/" target="_blank" style="color:#1e3c72">qr-code-generator.com</a></li>
-<li>Pilih tipe "Text"</li>
-<li>Ketik kode (contoh: TITIK-001)</li>
-<li>Download dan cetak</li>
-</ol>
-</div>
-</div>
-
-<!-- SETTING -->
-<div id="tab-s" class="pg">
-<div class="box">
-<h2>⚙️ Petugas</h2>
-<div id="off-list" style="margin:10px 0"></div>
-<button class="btn bp" onclick="addOff()">➕ Tambah Petugas</button>
-
-<div id="add-form" class="hide" style="margin-top:12px;padding:12px;background:#f8f9fa;border-radius:5px">
-<div class="fg"><label>Nama:</label><input id="nn"></div>
-<div class="fg"><label>NIP:</label><input id="np"></div>
-<button class="btn bs" onclick="saveOff()">💾 Simpan</button>
-<button class="btn bd" onclick="cancelOff()">❌ Batal</button>
-</div>
-
-<hr>
-
-<h3 style="color:#1e3c72;font-size:14px;margin-bottom:8px">☁️ Cloud Status</h3>
-<p style="color:#666;font-size:12px;margin:6px 0">Database: <strong>Firebase Firestore</strong></p>
-<p style="color:#666;font-size:12px;margin:6px 0">Storage: <strong>Base64 (Firestore)</strong></p>
-<p style="color:#666;font-size:12px;margin:6px 0">Total Records: <strong id="cnt">0</strong></p>
-<p style="color:#666;font-size:12px;margin:6px 0">Auto-delete: <strong>30 hari</strong></p>
-
-<hr>
-
-<h3 style="color:#1e3c72;font-size:14px;margin-bottom:8px">🗑️ Data Management</h3>
-<button class="btn bw" onclick="cleanOld()">🧹 Hapus Data Lama (>30 hari)</button>
-<button class="btn bd" onclick="clearAll()">🗑️ Hapus Semua Data</button>
-</div>
-</div>
-
-</div>
-</div>
-
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-// Firebase Config
+/* --- 1. FIREBASE CONFIG ---------------------------------------
+   Config di bawah SUDAH diambil dari website lama Anda
+   (proyek: lapas-banyuasin-patroli). Tidak perlu diubah —
+   semua data kontrol lama otomatis tersambung.                 */
 const firebaseConfig = {
   apiKey: "AIzaSyAoa-B4eecHpWmEa_wQ_iRx5cL-eHHcXWY",
   authDomain: "lapas-banyuasin-patroli.firebaseapp.com",
@@ -246,821 +413,432 @@ const firebaseConfig = {
   appId: "1:666403730194:web:52bd2ff94adc25e0a0b9cb"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-window.db = db;
-window.firestoreModules = { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot };
+/* --- 2. AKUN LOGIN --------------------------------------------
+   admin  = Anda (akses penuh: tambah petugas, hapus foto,
+            export PDF, hapus data)
+   kakplp = Ka.KPLP (hanya lihat dashboard)
+   Silakan GANTI password di bawah ini.                         */
+const USERS = {
+  "admin":  { password: "ariel2026",  role: "admin",  label: "Administrator" },
+  "kakplp": { password: "lapas2026",  role: "kakplp", label: "Ka.KPLP" }
+};
 
-console.log('🔥 Firebase initialized');
-document.getElementById('status').textContent = '🟢 Online';
-document.getElementById('status').className = 'status online';
-
-// Load on init
-setTimeout(() => {
-  if (window.load) window.load();
-}, 500);
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-
-<script>
-// CONFIG
-const QUALITY = 0.4;
-const MAX_W = 500;
-const PAGE = 8;
-const RETENTION = 30;
-
-// DEFAULT DATA
-let officers = [
-{name:"Agus Setiawan",nip:"199001011234567890"},
-{name:"Budi Hartono",nip:"199102021234567891"},
-{name:"Candra Wijaya",nip:"199203031234567892"},
-{name:"Dedi Kusuma",nip:"199304041234567893"},
-{name:"Eko Prasetyo",nip:"199405051234567894"}
+/* --- 3. TITIK PATROLI ----------------------------------------- */
+const TITIK = [
+  { kode: "TITIK-001", nama: "Area Samping Klinik" },
+  { kode: "TITIK-002", nama: "Area Laundry" },
+  { kode: "TITIK-003", nama: "Area Belakang Green House Melon dalam Lapas" },
+  { kode: "TITIK-004", nama: "Area Kolam Belakang Masjid" },
+  { kode: "TITIK-005", nama: "Area Ayam Petelur Brandgang Lapas" }
 ];
 
-const checkpoints = [
-{code:"TITIK-001",name:"Blok A Lt.1",description:"Hunian risiko tinggi"},
-{code:"TITIK-002",name:"Blok A Lt.2",description:"Hunian risiko tinggi"},
-{code:"TITIK-003",name:"Blok B Lt.1",description:"Hunian risiko sedang"},
-{code:"TITIK-004",name:"Blok B Lt.2",description:"Hunian risiko sedang"},
-{code:"TITIK-005",name:"Bengkel",description:"Area kerja"},
-{code:"TITIK-006",name:"Dapur",description:"Dapur umum"},
-{code:"TITIK-007",name:"R.Besuk",description:"Area kunjungan"},
-{code:"TITIK-008",name:"Pos Utama",description:"Gerbang utama"},
-{code:"TITIK-009",name:"Tembok Timur",description:"Keliling timur"},
-{code:"TITIK-010",name:"Tembok Barat",description:"Keliling barat"},
-{code:"TITIK-011",name:"Lapangan",description:"Olahraga"},
-{code:"TITIK-012",name:"Isolasi",description:"Sel isolasi"}
-];
+/* --- 4. LOGO INSTANSI (otomatis, jangan diubah) --------------- */
+const LOGO_KEMEN = "data:image/png;base64,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";
+const LOGO_PAS   = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIYAAAC0CAMAAABmFaQFAAADAFBMVEUbHFUAAACnp6YBgwIlJVYBewQcI1P7/PqGhpKZmZ3+1gAKDFH4yALQpxKSdys2N2UQRzJHR26zs61WVnfmuAqpqakHZxb///4MViZ4eIsAAD8SOjtRRUWnhyJpaYMbHFM4NE1qWDi3lBx/f38WNEN5ZDO1l1aHaTBFO0jRt2xYSjqdnaClpaWsiUy7u7unp6fQ5tGnp6fIp1elpaWmpqbp6unCnBiy1rNjYnvcsg7GqmWnp6f55YnlyHMtLmAtlC/r1HrS2NO3pGnHmFDZxG8oSFCdgSUHXR2ReEvGxsvt2YMgG1q8olWSxZOsmGYDBWEeH1c7O3d1ZkhvtXAvKSo6My5SpVRPeWiZmZr/4QAjI1lFOzKLuZKwjh6WhVS5ucPNs1owVlI2Z1GHa0hoWU5oqm20tLSkyag/Pz8/QGxGmkvgvGb/9I8LJT0DkANdXoBqlnmMjKKjekXlyIE4OGZRaG97p4aDWSjIyMgNFy8ydUVWU1dHh1ZZiGyIeGXZ89UfIFcbeSddUDzd3cQeRkQdiSEgDmIlczUriy9BQmtVVVVcmWdynICPhnGfoKCexqO0tLG/3MDExLX14nz//9QPCxsAAFUBSxMLYCAhFmAkaDo+hUw+mkA+ojxgTkh9cUl+uYGPkV+enp6ErI+bu6SifT+4uK/Bj0rVxoDAwMDZ2dnoyErp6cwfEmAALxEAPz8A//8jHyUuL2ExMWMtkA9ISG1fYIFdfzFWmTpBoz9tTzhmWGF/gJCHWB+Hh5aOjpaNtUaZ0Jilj2WxkCC+sG6ysqyzsau/4b7YsSPNu5nOzr3dyqDX0r7B5b7f4OHu7s3i4uIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCp/50AAABAHRSTlP+AP3///////79//7///////z//v8H/wL//gT////+mv///wP//////////dH/CE3/bf+vjv////7//y///////////////////////////6AE////////C/+l//////////////8s/wT//////////////8n///8M/////////6L//yn//////9wD/////P9W/0v/Gv8D//////////////8t////df//Iwf/I///BAH/tb7/B///////////ESL//////52v////Ov8z//8fCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOEpglQAAG3NJREFUeNrNXAdD41a2vravJaOGjYVtniWv5F4weCgGMwPMEGAYGOAtbZhMy7TMJtnU95LdtM1Ltr/tvfe++3rvvfef9M65kmwZbGMDk6wSGDesT9/5znfOla4u8Rxji0ZHRlLs0cjomTOjg/hoP4q/BwdTx/lCD+n1D1KDqd9kD95/9szE+LDX6x0enwAouO2zNwZHesfSC4wo7IA9+L/HRycQgLUNwOb1jiOYM6Ojg1ELS8p+cKowAIF1hNGR0Ylxr2srBRKJQMnLoAAzw+Pj42ccLKlUNHpaMKIp2BwhjA+7IfQNhfspEUVC+8NDAeCl/s7wxJmzFnOprkJEjhDCiC2Ex89MHEAwHQIEDIAFhtDQ9FCf+zOI5f3dyYUcKYTo459tDkNfIBGaQw4AQZ8XgwE/SAy+NhdKBJqwjE+M2liAl2gvMCAfUw6C5jCUAvbeKOzN2TulDh7AR218IBcXLeN2VmOEW8qFHBSCo8WRx1sLAbmH4wUEgWkgpb7NuV52onUoRG3lQnoRAuc6bIB0aKP9LpK41nIZPTvSIqOJowQL6M8fH20vhEYYSIetEaJOcrHdxYFCLBD462ejRwsh1BGBC8sTR8vFosUCgjCiaAkTrYVgfR1AahJCdxvSULLk8kQbuYwClJQFY9AzcmbYHYbp+gF0EkKXtLjlYlE77Q7R8JlBAAAwBj1nh11CYJ91/+2xEbSUS+P7HSzDZwECGfSM1sNwTCF0iSV0WC4WFMBBoiP4KBCqxw6FgKQ8lK0uF1t7oQDufTBKPJifCUL6T0EIPcsFDjYBu5/wkLPwz5BIA6cmhJ7kEpgTh1Ae5AzAmCN9A4l+8rZv/QlvH0e9AxODBGISEMMDYZG8AxvseFoMjO8PkmHvQEIMlMg7tPUFyHTUM0LOfv9fEvjkHdoCfeRRzx9Hyb7nP8LvJIwSfZfn3R4ykvpi6B1l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";
 
-const CRED = {username:"kakplp",password:"lapas2026"};
+/* ============================================================
+   ██  KODE SISTEM — TIDAK PERLU DIUBAH  ██
+   ============================================================ */
+let db = null, COL_P = "patrols", COL_O = "officers";
+let allRecords = [], allPetugas = [], filtered = [], shown = 20;
+let role = sessionStorage.getItem("sakti_role") || null;
+let scanner = null, scanning = false, fotoData = "";
 
-// STATE
-let qr = null;
-let stream = null;
-let curLoc = '';
-let photoData = '';
-let data = [];
-let logged = false;
-let displayed = PAGE;
-let curFilter = null;
-let isProcessing = false;
-let unsubscribe = null;
+const $ = id => document.getElementById(id);
 
-// UTILITY
-function $(id){return document.getElementById(id)}
+/* ---------- IKON LINE STYLE ---------- */
+const ICON={
+shield:'<path d="M12 2 4 5.5V11c0 5 3.4 9.4 8 10.6 4.6-1.2 8-5.6 8-10.6V5.5L12 2Z"/><path d="m9.2 11.6 2 2 3.8-4"/>',
+scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/>',
+chart:'<line x1="6" y1="20" x2="6" y2="15"/><line x1="12" y1="20" x2="12" y2="9"/><line x1="18" y1="20" x2="18" y2="4"/>',
+pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/>',
+play:'<polygon points="6 4 20 12 6 20 6 4"/>',
+stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',
+save:'<path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/>',
+x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>',
+refresh:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+check:'<circle cx="12" cy="12" r="10"/><path d="m8 12.5 2.7 2.7L16.5 9"/>',
+pdf:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+useradd:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>',
+img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+print:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+alert:'<path d="m10.29 3.86-8.4 14.5A2 2 0 0 0 3.62 21h16.76a2 2 0 0 0 1.73-2.64l-8.4-14.5a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+};
+function icSVG(n,sz){sz=sz||18;return '<svg class="li" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24">'+(ICON[n]||'')+'</svg>';}
+function renderIcons(){document.querySelectorAll('[data-ic]').forEach(el=>{el.innerHTML=icSVG(el.dataset.ic, el.dataset.sz);});}
+function setLogos(){document.querySelectorAll('[data-logo]').forEach(im=>{im.src=im.dataset.logo==="kemen"?LOGO_KEMEN:LOGO_PAS;});}
+const CAND_P = ["patrols","patroli","patrol","records","riwayat","kontrol","laporan","scans","history"];
+const CAND_O = ["officers","petugas","pegawai","staff"];
 
-function msg(text, type){
-  const m = $('msg');
-  m.textContent = text;
-  m.className = 'msg m'+type;
-  m.style.display = 'block';
-  setTimeout(()=>m.style.display='none', 2500);
+/* ---------- UTIL ---------- */
+function toast(msg, type){ const t=$("toast"); t.textContent=msg; t.className="show "+(type||""); setTimeout(()=>t.className="",2800); }
+function gf(o, keys, def=""){ for(const k of keys){ const v=o[k]; if(v!==undefined&&v!==null&&v!=="") return v; } return def; }
+function getTime(r){
+  const v = gf(r,["timestamp","waktu","createdAt","time","tanggal","date"],null);
+  if(!v) return null;
+  if(typeof v.toDate==="function") return v.toDate();
+  if(typeof v==="number") return new Date(v);
+  const d=new Date(v); return isNaN(d)?null:d;
 }
+function fmtTime(d){ if(!d) return "-"; return new Intl.DateTimeFormat("id-ID",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(d); }
+function sameDay(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+function beep(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.frequency.value=880; g.gain.value=.15; o.start(); setTimeout(()=>{o.stop();c.close();},140); }catch(e){} }
 
-function setBtnLoading(btnId, isLoading){
-  const btn = $(btnId);
-  if(!btn) return;
-  if(isLoading){
-    btn.disabled = true;
-    btn.dataset.orig = btn.innerHTML;
-    btn.innerHTML = '<span class="spn"></span>...';
-  } else {
-    btn.disabled = false;
-    if(btn.dataset.orig) btn.innerHTML = btn.dataset.orig;
-  }
+/* ---------- ROLE ---------- */
+function applyRole(){
+  const isAuth = role==="admin"||role==="kakplp";
+  const isAdmin = role==="admin";
+  $("btnAuth").innerHTML = isAuth ? icSVG("logout",15)+"Logout" : icSVG("lock",15)+"Login";
+  const chip=$("chipAdmin"); chip.classList.toggle("hide", !isAuth); chip.textContent=isAdmin?"ADMIN":"KA.KPLP";
+  $("dashLock").classList.toggle("hide", isAuth);
+  $("dashContent").classList.toggle("hide", !isAuth);
+  $("setLock").classList.toggle("hide", isAdmin);
+  $("setContent").classList.toggle("hide", !isAdmin);
+  document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hide", !isAdmin));
+  renderHistory(); renderPetugas();
 }
+function openLogin(){ $("loginModal").classList.add("show"); $("loginErr").classList.remove("show"); $("inpUser").value=""; $("inpPass").value=""; setTimeout(()=>$("inpUser").focus(),100); }
+function closeLogin(){ $("loginModal").classList.remove("show"); }
+$("btnAuth").onclick = ()=>{ if(role){ role=null; sessionStorage.clear(); applyRole(); toast("Anda telah logout"); } else openLogin(); };
+$("btnLogin").onclick = ()=>{
+  const u=$("inpUser").value.trim().toLowerCase(), p=$("inpPass").value;
+  if(USERS[u] && USERS[u].password===p){
+    role=USERS[u].role; sessionStorage.setItem("sakti_role",role); sessionStorage.setItem("sakti_user",u);
+    closeLogin(); applyRole(); toast("Selamat datang, "+USERS[u].label+"!","ok");
+  } else $("loginErr").classList.add("show");
+};
+$("inpPass").addEventListener("keydown",e=>{ if(e.key==="Enter") $("btnLogin").click(); });
 
-function compress(b64, maxW, q){
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if(w > maxW){ h = h*maxW/w; w = maxW; }
-      canvas.width = w; 
-      canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', q));
-    };
-    img.src = b64;
-  });
-}
-
-// FIREBASE OPERATIONS
-async function loadFromFirebase(){
-  try {
-    const { collection, getDocs, query, orderBy } = window.firestoreModules;
-    
-    // Load patrols
-    const q = query(collection(window.db, 'patrols'), orderBy('timestamp', 'desc'));
-    const snapshot = await getDocs(q);
-    data = [];
-    snapshot.forEach(doc => {
-      data.push({ id: doc.id, ...doc.data() });
-    });
-    console.log('📥 Loaded', data.length, 'patrols from Firebase');
-    
-    // Load officers
-    const offSnapshot = await getDocs(collection(window.db, 'officers'));
-    if(!offSnapshot.empty){
-      officers = [];
-      offSnapshot.forEach(doc => {
-        officers.push({ id: doc.id, ...doc.data() });
-      });
-      console.log('📥 Loaded', officers.length, 'officers from Firebase');
-      fillOffSel();
-      showOffList();
-    } else {
-      // First time: sync default officers to Firebase
-      await syncOfficersToFirebase();
-    }
-  } catch(e){
-    console.error('Firebase load error:', e);
-    $('status').textContent = '🔴 Offline';
-    $('status').className = 'status offline';
-  }
-}
-
-async function syncOfficersToFirebase(){
-  try {
-    const { collection, addDoc } = window.firestoreModules;
-    for(const officer of officers){
-      if(!officer.id){ // Only add if not yet in Firebase
-        await addDoc(collection(window.db, 'officers'), {
-          name: officer.name,
-          nip: officer.nip
-        });
-      }
-    }
-    console.log('✅ Officers synced to Firebase');
-    await loadFromFirebase(); // Reload to get IDs
-  } catch(e){
-    console.error('Officers sync error:', e);
-  }
-}
-
-async function saveToFirebase(record){
-  try {
-    const { collection, addDoc } = window.firestoreModules;
-    await addDoc(collection(window.db, 'patrols'), record);
-    console.log('💾 Saved to Firebase');
-    return true;
-  } catch(e){
-    console.error('Firebase save error:', e);
-    msg('Gagal simpan ke cloud: ' + e.message, 'e');
-    return false;
-  }
-}
-
-async function deleteFromFirebase(docId){
-  try {
-    const { doc, deleteDoc } = window.firestoreModules;
-    await deleteDoc(doc(window.db, 'patrols', docId));
-    console.log('🗑️ Deleted from Firebase');
-    return true;
-  } catch(e){
-    console.error('Firebase delete error:', e);
-    return false;
-  }
-}
-
-let updateTimeout = null;
-
-function startRealtimeListener(){
-  if(unsubscribe) unsubscribe();
-  
-  const { collection, query, orderBy, onSnapshot } = window.firestoreModules;
-  const q = query(collection(window.db, 'patrols'), orderBy('timestamp', 'desc'));
-  
-  unsubscribe = onSnapshot(q, (snapshot) => {
-    data = [];
-    snapshot.forEach(doc => {
-      data.push({ id: doc.id, ...doc.data() });
-    });
-    console.log('🔄 Real-time update:', data.length, 'records');
-    
-    // Debounce UI update to prevent lag
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      if(logged) update();
-    }, 300);
-  }, (error) => {
-    console.error('Listener error:', error);
-    $('status').textContent = '🔴 Offline';
-    $('status').className = 'status offline';
-  });
-}
-
-// DATA MANAGEMENT
-async function load(){
-  // Load data from Firebase (includes officers)
-  await loadFromFirebase();
-  
-  // Start real-time listener
-  startRealtimeListener();
-  
-  showCps();
-}
-
-// OFFICERS
-function fillOffSel(){
-  const s = $('off');
-  s.innerHTML = '<option value="">-- Pilih Petugas --</option>';
-  officers.forEach(o => {
-    const opt = document.createElement('option');
-    opt.value = o.name;
-    opt.textContent = o.name;
-    s.appendChild(opt);
-  });
-}
-
-function showOffList(){
-  const c = $('off-list');
-  if(!officers.length){
-    c.innerHTML = '<p class="empty">Belum ada petugas</p>';
-    return;
-  }
-  c.innerHTML = officers.map((o,i) => 
-    `<div style="background:#f8f9fa;padding:8px 10px;border-radius:5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
-      <div><strong style="font-size:13px">${o.name}</strong><br><small style="color:#666;font-size:11px">${o.nip}</small></div>
-      <button class="btn bd" style="padding:6px 10px;margin:0;min-height:32px" onclick="delOff(${i})">🗑️</button>
-    </div>`
-  ).join('');
-}
-
-function showCps(){
-  $('cps').innerHTML = checkpoints.map(c => 
-    `<div class="cp">
-      <h3>${c.name}</h3>
-      <p>${c.description}</p>
-      <p style="margin-top:4px"><code>${c.code}</code></p>
-    </div>`
-  ).join('');
-}
-
-function addOff(){ $('add-form').classList.remove('hide'); }
-function cancelOff(){
-  $('add-form').classList.add('hide');
-  $('nn').value = '';
-  $('np').value = '';
-}
-
-function saveOff(){
-  const n = $('nn').value.trim();
-  const p = $('np').value.trim();
-  if(!n || !p){ alert('Nama dan NIP harus diisi'); return; }
-  
-  // Save to Firebase
-  saveOfficerToFirebase({name:n, nip:p});
-  cancelOff();
-}
-
-async function saveOfficerToFirebase(officer){
-  try {
-    const { collection, addDoc } = window.firestoreModules;
-    await addDoc(collection(window.db, 'officers'), officer);
-    msg('Petugas ditambahkan ke cloud', 's');
-    await loadFromFirebase(); // Reload
-  } catch(e){
-    msg('Gagal simpan petugas: ' + e.message, 'e');
-  }
-}
-
-function delOff(i){
-  if(confirm(`Hapus ${officers[i].name}?`)){
-    deleteOfficerFromFirebase(officers[i].id);
-  }
-}
-
-async function deleteOfficerFromFirebase(docId){
-  try {
-    const { doc, deleteDoc } = window.firestoreModules;
-    await deleteDoc(doc(window.db, 'officers', docId));
-    msg('Petugas dihapus dari cloud', 's');
-    await loadFromFirebase(); // Reload
-  } catch(e){
-    msg('Gagal hapus petugas: ' + e.message, 'e');
-  }
-}
-
-// LOGIN
-function showLogin(){
-  $('main').classList.add('hide');
-  $('login').classList.remove('hide');
-}
-
-function cancelLogin(){
-  $('login').classList.add('hide');
-  $('main').classList.remove('hide');
-  tab('p');
-}
-
-function doLogin(){
-  const u = $('u').value.trim();
-  const p = $('p').value.trim();
-  if(u === CRED.username && p === CRED.password){
-    logged = true;
-    $('login').classList.add('hide');
-    $('main').classList.remove('hide');
-    $('lock').classList.add('hide');
-    $('dash').classList.remove('hide');
-    tab('d');
-  } else {
-    const m = $('lmsg');
-    m.textContent = 'Username/password salah';
-    m.className = 'msg me';
-    m.style.display = 'block';
-    setTimeout(()=>m.style.display='none', 2500);
-  }
-  $('u').value = '';
-  $('p').value = '';
-}
-
-function logout(){
-  if(confirm('Logout?')){
-    logged = false;
-    $('lock').classList.remove('hide');
-    $('dash').classList.add('hide');
-    tab('p');
-  }
-}
-
-// QR SCANNER
-let scannerReady = false;
-let scannerRetries = 0;
-const MAX_RETRIES = 5;
-
-async function initScanner(){
-  if(scannerReady) return true;
-  
-  if(typeof Html5Qrcode === 'undefined'){
-    scannerRetries++;
-    if(scannerRetries < MAX_RETRIES){
-      console.log('Waiting for QR library...', scannerRetries);
-      await new Promise(r => setTimeout(r, 500));
-      return initScanner();
-    } else {
-      msg('Library scanner gagal dimuat. Refresh halaman.', 'e');
-      return false;
-    }
-  }
-  
-  scannerReady = true;
-  return true;
-}
-
-async function startScan(){
-  if(qr && qr.isScanning) return;
-  
-  // Wait for library
-  const ready = await initScanner();
-  if(!ready) return;
-  
-  try {
-    // Stop existing scanner
-    if(qr) {
-      try { 
-        await qr.stop();
-        await new Promise(r => setTimeout(r, 200)); 
-      } catch(e) {}
-      qr = null;
-    }
-    
-    qr = new Html5Qrcode("reader");
-    await qr.start(
-      {facingMode:"environment"},
-      {fps:5, qrbox:{width:200,height:200}},
-      onScanSuccess,
-      ()=>{}
-    );
-    console.log('✅ Scanner started');
-  } catch(e){
-    console.error('Scanner error:', e);
-    msg('Kamera tidak tersedia atau diblokir', 'e');
-  }
-}
-
-function onScanSuccess(text){
-  const cleaned = text.trim();
-  const cp = checkpoints.find(c => c.code === cleaned);
-  
-  curLoc = cp ? `${cp.name} (${cp.code})` : cleaned;
-  
-  $('loc').value = curLoc;
-  msg('✅ Lokasi: '+curLoc+' — Pilih petugas lalu klik Buka Kamera', 's');
-  stopScan();
-  
-  $('cam-sec').classList.remove('hide');
-  $('vid').style.display = 'none';
-  $('photo').style.display = 'none';
-  $('btn-cam').classList.remove('hide');
-  $('btn-photo').classList.add('hide');
-}
-
-async function startScanManual(){
-  $('btn-start-scan').style.display = 'none';
-  $('btn-stop-scan').style.display = 'inline-block';
-  await startScan();
-}
-
-async function stopScan(){
-  if(qr && qr.isScanning){
-    try {
-      await qr.stop();
-    } catch(e) { console.log(e); }
-  }
-  $('scan-sec').classList.remove('hide');
-  $('btn-start-scan').style.display = 'inline-block';
-  $('btn-stop-scan').style.display = 'none';
-}
-
-async function openCamera(){
-  const off = $('off').value;
-  if(!off){ msg('Pilih petugas dulu sebelum buka kamera', 'e'); return; }
-  
-  $('btn-cam').disabled = true;
-  $('btn-cam').innerHTML = '<span class="spn"></span>Membuka...';
-  
-  await showCam();
-}
-
-async function showCam(){
-  try {
-    if(stream){
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-      await new Promise(r => setTimeout(r, 200));
-    }
-    
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: {facingMode:"environment"},
-      audio: false
-    });
-    
-    const vid = $('vid');
-    vid.srcObject = stream;
-    vid.style.display = 'block';
-    
-    await new Promise((resolve, reject) => {
-      vid.onloadedmetadata = () => vid.play().then(resolve).catch(reject);
-      setTimeout(() => reject(new Error('Timeout')), 8000);
-    });
-    
-    // Show foto button, hide open camera button
-    $('btn-cam').classList.add('hide');
-    $('btn-photo').classList.remove('hide');
-    $('lbl-foto').classList.remove('hide');
-    
-    msg('Kamera siap! Klik Ambil Foto', 's');
-    console.log('✅ Camera opened');
-  } catch(e){
-    console.error('Camera error:', e);
-    msg('Gagal buka kamera. Coba lagi.', 'e');
-    $('btn-cam').disabled = false;
-    $('btn-cam').innerHTML = '📷 Buka Kamera';
-  }
-}
-
-async function takePhoto(){
-  if(isProcessing) return;
-  isProcessing = true;
-  setBtnLoading('btn-photo', true);
-  
-  try {
-    const v = $('vid');
-    const c = document.createElement('canvas');
-    c.width = v.videoWidth;
-    c.height = v.videoHeight;
-    c.getContext('2d').drawImage(v, 0, 0);
-    const raw = c.toDataURL('image/jpeg', 0.8);
-    photoData = await compress(raw, MAX_W, QUALITY);
-    
-    const img = $('photo');
-    img.src = photoData;
-    img.style.display = 'block';
-    msg('Foto siap', 's');
-  } catch(e){
-    msg('Gagal ambil foto', 'e');
-  } finally {
-    setBtnLoading('btn-photo', false);
-    isProcessing = false;
-  }
-}
-
-async function savePat(){
-  if(isProcessing) return;
-  
-  const off = $('off').value;
-  if(!off){ msg('Pilih petugas dulu', 'e'); return; }
-  if(!photoData){ msg('Foto dulu', 'e'); return; }
-  
-  isProcessing = true;
-  setBtnLoading('btn-save', true);
-  
-  await new Promise(r => setTimeout(r, 50));
-  
-  try {
-    const record = {
-      officer: off,
-      location: curLoc,
-      timestamp: new Date().toISOString(),
-      photo: photoData
-    };
-    
-    const success = await saveToFirebase(record);
-    
-    if(success){
-      msg('Tersimpan ke cloud!', 's');
-      setTimeout(() => {
-        cancelCam();
-        resetScan();
-      }, 1000);
-    }
-  } catch(e){
-    msg('Error: '+e.message, 'e');
-  } finally {
-    setBtnLoading('btn-save', false);
-    isProcessing = false;
-  }
-}
-
-function cancelCam(){
-  if(stream){
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  $('cam-sec').classList.add('hide');
-  $('vid').style.display = 'none';
-  $('vid').srcObject = null;
-  $('photo').style.display = 'none';
-  $('btn-cam').classList.remove('hide');
-  $('btn-cam').disabled = false;
-  $('btn-cam').innerHTML = '📷 Buka Kamera';
-  $('btn-photo').classList.add('hide');
-  $('lbl-foto').classList.add('hide');
-  $('off').value = '';
-  photoData = '';
-  curLoc = '';
-}
-
-function resetScan(){
-  $('scan-sec').classList.remove('hide');
-  // Tidak auto-start scanner
-}
-
-// TABS
-function tab(t){
-  if(t !== 'p'){
-    stopScan();
-    cancelCam();
-  }
-  
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.pg').forEach(c => c.classList.remove('on'));
-  
-  const map = {p:0, d:1, c:2, s:3};
-  document.querySelectorAll('.tab')[map[t]].classList.add('on');
-  $('tab-'+t).classList.add('on');
-  
-  // Tidak auto-start scanner saat pindah tab
-  if(t === 'd' && logged){
-    update();
-  }
-  if(t === 's'){
-    $('cnt').textContent = data.length;
-  }
-}
-
-// DASHBOARD
-async function refreshData(){
-  msg('Mengambil data terbaru...', 'i');
-  await loadFromFirebase();
-  if(logged) update();
-  msg('Data di-refresh!', 's');
-}
-
-function update(){
-  if(!logged) return;
-  
-  const today = new Date().toDateString();
-  const todayData = data.filter(p => new Date(p.timestamp).toDateString() === today);
-  
-  $('t1').textContent = todayData.length;
-  $('t4').textContent = data.length;
-  
-  const locs = [...new Set(data.map(p => p.location))];
-  $('t2').textContent = locs.length;
-  
-  const offs = [...new Set(data.map(p => p.officer))];
-  $('t3').textContent = offs.length;
-  
-  fillFilters(locs, offs);
-  displayed = PAGE;
-  curFilter = null;
-  showHist(data);
-}
-
-function fillFilters(locs, offs){
-  const fl = $('fl');
-  const fo = $('fo');
-  
-  const curL = fl.value;
-  const curO = fo.value;
-  
-  fl.innerHTML = '<option value="">Semua</option>';
-  locs.forEach(l => {
-    const opt = document.createElement('option');
-    opt.value = l;
-    opt.textContent = l;
-    fl.appendChild(opt);
-  });
-  fl.value = curL;
-  
-  fo.innerHTML = '<option value="">Semua</option>';
-  offs.forEach(o => {
-    const opt = document.createElement('option');
-    opt.value = o;
-    opt.textContent = o;
-    fo.appendChild(opt);
-  });
-  fo.value = curO;
-}
-
-function showHist(arr){
-  const c = $('hist');
-  $('rcnt').textContent = arr.length;
-  
-  if(!arr.length){
-    c.innerHTML = '<p class="empty">Belum ada data patroli</p>';
-    $('more').classList.add('hide');
-    return;
-  }
-  
-  const toShow = arr.slice(0, displayed);
-  
-  const html = toShow.map(r => {
-    const d = new Date(r.timestamp);
-    return `<div class="rec">
-      <h3>📍 ${r.location}</h3>
-      <p><strong>Petugas:</strong> ${r.officer}</p>
-      <p><strong>Waktu:</strong> ${d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}</p>
-      <img src="${r.photo}" loading="lazy" alt="Foto">
-    </div>`;
-  }).join('');
-  
-  c.innerHTML = html;
-  
-  if(displayed < arr.length){
-    $('more').classList.remove('hide');
-    $('more').textContent = `Tampilkan ${Math.min(PAGE, arr.length-displayed)} Lagi (${arr.length-displayed} tersisa)`;
-  } else {
-    $('more').classList.add('hide');
-  }
-}
-
-function loadMore(){
-  displayed += PAGE;
-  showHist(curFilter || data);
-}
-
-function filter(){
-  const d = $('fd').value;
-  const l = $('fl').value;
-  const o = $('fo').value;
-  
-  let f = [...data];
-  if(d) f = f.filter(p => new Date(p.timestamp).toDateString() === new Date(d).toDateString());
-  if(l) f = f.filter(p => p.location === l);
-  if(o) f = f.filter(p => p.officer === o);
-  
-  curFilter = f;
-  displayed = PAGE;
-  showHist(f);
-}
-
-// EXPORT PDF
-async function exportPDF(){
-  if(!data.length){ alert('Belum ada data'); return; }
-  
-  setBtnLoading('btn-pdf', true);
-  
-  try {
-    if(typeof jspdf === 'undefined'){
-      alert('Library PDF belum dimuat');
-      setBtnLoading('btn-pdf', false);
-      return;
-    }
-    
-    await new Promise(r => setTimeout(r, 100));
-    
-    const {jsPDF} = window.jspdf;
-    const doc = new jsPDF();
-    
-    doc.setFontSize(16);
-    doc.text('SAKTI - LAPORAN PATROLI', 105, 15, {align:'center'});
-    doc.setFontSize(10);
-    doc.text('Sistem Pemetaan dan Pengawasan Patroli Pengamanan', 105, 22, {align:'center'});
-    doc.setFontSize(9);
-    doc.text('Lapas Kelas IIA Banyuasin', 105, 28, {align:'center'});
-    
-    const fd = $('fd').value;
-    const fl = $('fl').value;
-    const fo = $('fo').value;
-    
-    let txt = 'Filter: ';
-    if(fd) txt += `Tgl ${fd} `;
-    if(fl) txt += `| Lok: ${fl} `;
-    if(fo) txt += `| Pet: ${fo}`;
-    if(!fd && !fl && !fo) txt = 'Semua Data';
-    
-    doc.setFontSize(9);
-    doc.text(txt, 15, 35);
-    
-    let f = curFilter || [...data];
-    
-    let y = 43;
-    doc.setFontSize(9);
-    
-    f.forEach((r, i) => {
-      if(y > 270){ doc.addPage(); y = 20; }
-      const d = new Date(r.timestamp);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${i+1}. ${r.location}`, 15, y);
-      y += 5;
-      doc.setFont(undefined, 'normal');
-      doc.text(`Petugas: ${r.officer}`, 20, y);
-      y += 5;
-      doc.text(`Waktu: ${d.toLocaleString('id-ID')}`, 20, y);
-      y += 8;
-    });
-    
-    const tp = doc.internal.pages.length - 1;
-    for(let i = 1; i <= tp; i++){
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(`Hal ${i}/${tp}`, 105, 290, {align:'center'});
-      doc.text(`Cetak: ${new Date().toLocaleString('id-ID')}`, 15, 290);
-    }
-    
-    doc.save(`Patroli_${new Date().toISOString().split('T')[0]}.pdf`);
-  } catch(e){
-    alert('Error PDF: '+e.message);
-  } finally {
-    setBtnLoading('btn-pdf', false);
-  }
-}
-
-// DATA MANAGEMENT
-async function cleanOld(){
-  if(!confirm('Hapus data lebih dari 30 hari?')) return;
-  
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - RETENTION);
-  
-  let deleted = 0;
-  for(const rec of data){
-    if(new Date(rec.timestamp) < cutoff){
-      await deleteFromFirebase(rec.id);
-      deleted++;
-    }
-  }
-  
-  await loadFromFirebase();
-  if(logged) update();
-  alert(deleted > 0 ? `${deleted} data lama dihapus` : 'Tidak ada data lama');
-}
-
-async function clearAll(){
-  if(confirm('HAPUS SEMUA DATA?\nTindakan ini tidak bisa dibatalkan!')){
-    if(confirm('Yakin sekali lagi?')){
-      for(const rec of data){
-        await deleteFromFirebase(rec.id);
-      }
-      await loadFromFirebase();
-      if(logged) update();
-      alert('Semua data dihapus');
-    }
-  }
-}
-
-// INIT
-$('fd').valueAsDate = new Date();
-
-window.load = load;
-
-window.addEventListener('beforeunload', () => {
-  if(qr && qr.isScanning){
-    try { qr.stop(); } catch(e){}
-  }
-  if(stream){
-    stream.getTracks().forEach(t => t.stop());
-  }
-  if(unsubscribe) unsubscribe();
+/* ---------- TABS ---------- */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tabpage").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active"); $("tab-"+t.dataset.tab).classList.add("active");
 });
+
+/* ---------- NETWORK ---------- */
+function net(){ const on=navigator.onLine; $("netDot").classList.toggle("off",!on); $("netTxt").textContent=on?"Online":"Offline"; }
+addEventListener("online",net); addEventListener("offline",net); net();
+
+/* ---------- FIREBASE ---------- */
+async function detectCol(cands, def){
+  for(const c of cands){ try{ const s=await db.collection(c).limit(1).get(); if(!s.empty) return c; }catch(e){} }
+  return def;
+}
+async function initFirebase(){
+  if(!firebaseConfig.apiKey){ $("configWarn").classList.remove("hide"); return; }
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    COL_P = await detectCol(CAND_P,"patroli");
+    COL_O = await detectCol(CAND_O,"petugas");
+    $("cloudCol").textContent = COL_P;
+    db.collection(COL_P).limit(1000).onSnapshot(s=>{
+      allRecords = s.docs.map(d=>({id:d.id, ...d.data()}));
+      allRecords.sort((a,b)=>(getTime(b)||0)-(getTime(a)||0));
+      refreshDash();
+    }, e=>{ console.error(e); toast("Gagal memuat data patroli","err"); });
+    db.collection(COL_O).limit(300).onSnapshot(s=>{
+      allPetugas = s.docs.map(d=>({id:d.id, ...d.data()}));
+      allPetugas.sort((a,b)=>String(gf(a,["name","nama"])).localeCompare(String(gf(b,["name","nama"]))));
+      fillPetugasSelects(); renderPetugas();
+    }, e=>console.error(e));
+  }catch(e){ console.error(e); toast("Koneksi Firebase gagal — periksa config","err"); $("configWarn").classList.remove("hide"); }
+}
+
+/* ---------- TITIK UI + QR ---------- */
+function buildTitik(){
+  const grid=$("titikGrid"), pr=$("prGrid");
+  TITIK.forEach((t,i)=>{
+    const card=document.createElement("div"); card.className="titik-card";
+    card.innerHTML=`<span class="kode">${t.kode}</span><div class="qr" id="qr${i}"></div><div class="nm">Titik ${i+1}<br>${t.nama}</div>`;
+    grid.appendChild(card);
+    new QRCode(document.getElementById("qr"+i),{text:t.kode,width:118,height:118,correctLevel:QRCode.CorrectLevel.H});
+    const pc=document.createElement("div"); pc.className="pr-card";
+    pc.innerHTML=`<div class="pr-logos"><img data-logo="kemen" alt=""><img data-logo="pas" alt=""></div><div class="k">${t.kode}</div><div class="n">Titik ${i+1} — ${t.nama}</div><div class="qr" id="pq${i}"></div><div class="f">SAKTI • Sistem Patroli Pengamanan • Lapas Kelas IIA Banyuasin</div>`;
+    pr.appendChild(pc);
+    new QRCode(document.getElementById("pq"+i),{text:t.kode,width:210,height:210,correctLevel:QRCode.CorrectLevel.H});
+  });
+}
+
+/* ---------- SCANNER ---------- */
+let scanKode="", scanLokasi="", lastScanErr=0;
+function resolveScan(text){
+  const t=text.trim();
+  let hit=TITIK.find(x=>x.kode.toLowerCase()===t.toLowerCase());
+  if(!hit) hit=TITIK.find(x=>x.nama.toLowerCase()===t.toLowerCase());
+  return hit||null;  // QR tak terdaftar = DITOLAK
+}
+$("btnStartScan").onclick = async ()=>{
+  if(scanning) return;
+  try{
+    scanner = new Html5Qrcode("reader");
+    $("scanIdle").style.display="none"; $("scanWrap").classList.add("on"); scanning=true;
+    await scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:220,height:220}},
+      txt=>{
+        const t=resolveScan(txt);
+        if(!t){
+          if(Date.now()-lastScanErr>2500){ lastScanErr=Date.now(); toast("QR tidak terdaftar — gunakan QR resmi SAKTI","err"); }
+          return; // scanner tetap berjalan, tunggu QR yang benar
+        }
+        beep();
+        scanKode=t.kode; scanLokasi=t.nama+" ("+t.kode+")";
+        $("locDisplay").classList.add("ok"); $("locText").textContent=scanLokasi;
+        $("badgeLocTxt").textContent="Titik terverifikasi: "+t.nama;
+        $("badgeLoc").classList.add("show");
+        stopScan(); toast("QR terverifikasi: "+t.kode,"ok");
+      }, ()=>{});
+  }catch(e){ scanning=false; $("scanIdle").style.display=""; $("scanWrap").classList.remove("on");
+    toast("Kamera tidak dapat diakses — izinkan akses kamera","err"); }
+};
+async function stopScan(){
+  if(scanner&&scanning){ try{ await scanner.stop(); scanner.clear(); }catch(e){} }
+  scanning=false; $("scanWrap").classList.remove("on"); $("scanIdle").style.display="";
+}
+$("btnStopScan").onclick=stopScan;
+
+/* ---------- FOTO ---------- */
+$("fileFoto").addEventListener("change", async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  fotoData = await compress(file, .6);
+  if(fotoData.length > 950000) fotoData = await compress(file, .35);
+  $("imgPreview").src=fotoData; $("imgPreview").style.display="block"; $("fotoEmpty").style.display="none";
+});
+function compress(file,q){
+  return new Promise(res=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const scale=Math.min(1, 640/img.width);
+      const c=document.createElement("canvas");
+      c.width=img.width*scale; c.height=img.height*scale;
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg",q));
+    };
+    img.src=url;
+  });
+}
+
+/* ---------- SIMPAN ---------- */
+$("btnSimpan").onclick = async ()=>{
+  if(!db) return toast("Firebase belum dikonfigurasi","err");
+  const petugas=$("selPetugas").value;
+  if(!petugas) return toast("Pilih petugas terlebih dahulu","err");
+  if(!scanLokasi) return toast("Scan QR di titik patroli terlebih dahulu","err");
+  if(!fotoData) return toast("Ambil foto bukti patroli","err");
+  const opt=$("selPetugas").selectedOptions[0];
+  $("btnSimpan").disabled=true; $("btnSimpan").innerHTML="Menyimpan...";
+  try{
+    await db.collection(COL_P).add({
+      officer: petugas, nip: opt?.dataset.nip||"",
+      location: scanLokasi, kode: scanKode,
+      photo: fotoData, via: "QR",
+      timestamp: new Date().toISOString(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast("Laporan patroli tersimpan ke cloud","ok"); resetForm();
+  }catch(e){ console.error(e); toast("Gagal menyimpan — periksa koneksi","err"); }
+  $("btnSimpan").disabled=false; $("btnSimpan").innerHTML=icSVG("save",17)+"Simpan ke Cloud";
+};
+function resetForm(){
+  $("selPetugas").value="";
+  scanKode=""; scanLokasi="";
+  $("locDisplay").classList.remove("ok");
+  $("locText").textContent="Belum discan — pindai QR di titik patroli";
+  fotoData=""; $("fileFoto").value=""; $("imgPreview").style.display="none";
+  $("fotoEmpty").style.display=""; $("badgeLoc").classList.remove("show");
+}
+$("btnBatal").onclick=resetForm;
+
+/* ---------- DASHBOARD ---------- */
+function refreshDash(){
+  const now=new Date();
+  const today=allRecords.filter(r=>sameDay(getTime(r),now));
+  $("statToday").textContent=today.length;
+  $("statLokasi").textContent=new Set(today.map(r=>gf(r,["location","lokasi","titik"]))).size+"/"+TITIK.length;
+  $("statPetugas").textContent=new Set(today.map(r=>gf(r,["officer","petugas","nama"]))).size;
+  $("statTotal").textContent=allRecords.length;
+  $("cloudTotal").textContent=allRecords.length;
+  fillLokasiFilter();
+  applyFilter(false);
+}
+function fillLokasiFilter(){
+  const f=$("fLokasi"); const cur=f.value;
+  const set=new Set(TITIK.map(t=>t.nama+" ("+t.kode+")"));
+  allRecords.forEach(r=>{ const l=gf(r,["location","lokasi","titik"]); if(l) set.add(l); });
+  f.innerHTML='<option value="">Semua</option>'+[...set].sort().map(l=>`<option value="${l}">${l}</option>`).join("");
+  f.value=cur;
+}
+function applyFilter(resetShown=true){
+  if(resetShown) shown=20;
+  const d=$("fDate").value, l=$("fLokasi").value, p=$("fPetugas").value;
+  filtered=allRecords.filter(r=>{
+    if(d){ const t=getTime(r); if(!t) return false;
+      const ds=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+      if(ds!==d) return false; }
+    if(l && gf(r,["location","lokasi","titik"])!==l) return false;
+    if(p && gf(r,["officer","petugas","nama"])!==p) return false;
+    return true;
+  });
+  renderHistory();
+}
+$("btnFilter").onclick=()=>applyFilter(true);
+$("btnResetFilter").onclick=()=>{ $("fDate").value=""; $("fLokasi").value=""; $("fPetugas").value=""; applyFilter(true); };
+$("btnMore").onclick=()=>{ shown+=20; renderHistory(); };
+
+function renderHistory(){
+  const box=$("historyList"); if(!box) return;
+  $("histCount").textContent="("+filtered.length+")";
+  if(!filtered.length){ box.innerHTML='<div class="empty">Tidak ada data yang cocok.</div>'; $("btnMore").classList.add("hide"); return; }
+  const isAdmin=role==="admin";
+  box.innerHTML=filtered.slice(0,shown).map(r=>{
+    const foto=gf(r,["photo","foto","image","img","fotoBase64"]);
+    const nm=gf(r,["officer","petugas","nama"],"(tanpa nama)");
+    const lok=gf(r,["location","lokasi","titik"],"-");
+    const via=gf(r,["via"],"");
+    return `<div class="hist-item">
+      ${foto?`<img class="hist-thumb" src="${foto}" onclick="openPhoto(this.src)" alt="foto">`:`<div class="hist-thumb noimg">${icSVG('img',20)}</div>`}
+      <div class="hist-info"><b>${nm}</b><span class="loc">${icSVG('pin',12)}${lok}</span><br><span class="time">${fmtTime(getTime(r))}${via?" • "+via:""}</span></div>
+      ${isAdmin?`<button class="btn-del" onclick="delRecord('${r.id}')" title="Hapus (Admin)">${icSVG('trash',15)}</button>`:""}
+    </div>`;
+  }).join("");
+  $("btnMore").classList.toggle("hide", filtered.length<=shown);
+}
+function openPhoto(src){ $("photoModalImg").src=src; $("photoModal").classList.add("show"); }
+async function delRecord(id){
+  if(role!=="admin") return toast("Hanya Admin yang dapat menghapus","err");
+  if(!confirm("Hapus foto & data kontrol ini secara permanen?")) return;
+  try{ await db.collection(COL_P).doc(id).delete(); toast("Data terhapus","ok"); }
+  catch(e){ toast("Gagal menghapus","err"); }
+}
+
+/* ---------- PETUGAS ---------- */
+function fillPetugasSelects(){
+  const sel=$("selPetugas"), f=$("fPetugas");
+  const cur=sel.value, curF=f.value;
+  sel.innerHTML='<option value="">-- Pilih Petugas --</option>';
+  f.innerHTML='<option value="">Semua</option>';
+  const names=new Set();
+  allPetugas.forEach(p=>{
+    const nm=gf(p,["name","nama"]); if(!nm||names.has(nm)) return; names.add(nm);
+    sel.insertAdjacentHTML("beforeend",`<option value="${nm}" data-nip="${gf(p,["nip"])}">${nm}</option>`);
+    f.insertAdjacentHTML("beforeend",`<option value="${nm}">${nm}</option>`);
+  });
+  allRecords.forEach(r=>{ const nm=gf(r,["officer","petugas","nama"]);
+    if(nm&&!names.has(nm)){ names.add(nm); f.insertAdjacentHTML("beforeend",`<option value="${nm}">${nm}</option>`);} });
+  sel.value=cur; f.value=curF;
+}
+function renderPetugas(){
+  const box=$("petugasList"); if(!box) return;
+  if(!allPetugas.length){ box.innerHTML='<div class="empty">Belum ada petugas.</div>'; return; }
+  const isAdmin=role==="admin";
+  box.innerHTML=allPetugas.map(p=>{
+    const nm=gf(p,["name","nama"],"?");
+    const ini=nm.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
+    return `<div class="petugas-item"><div class="avatar">${ini}</div>
+      <div class="grow"><b>${nm}</b><span>${gf(p,["nip"],"NIP: -")}</span></div>
+      ${isAdmin?`<button class="btn-del" onclick="delPetugas('${p.id}')" title="Hapus">${icSVG('trash',15)}</button>`:""}</div>`;
+  }).join("");
+}
+$("btnAddPetugas").onclick=async ()=>{
+  if(role!=="admin") return toast("Hanya Admin","err");
+  if(!db) return toast("Firebase belum dikonfigurasi","err");
+  const nama=$("inpNama").value.trim(), nip=$("inpNip").value.trim();
+  if(!nama) return toast("Isi nama petugas","err");
+  try{
+    await db.collection(COL_O).add({name:nama,nip,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    $("inpNama").value=""; $("inpNip").value=""; toast("Petugas ditambahkan","ok");
+  }catch(e){ toast("Gagal menambah petugas","err"); }
+};
+async function delPetugas(id){
+  if(role!=="admin") return;
+  if(!confirm("Hapus petugas ini dari daftar?")) return;
+  try{ await db.collection(COL_O).doc(id).delete(); toast("Petugas dihapus","ok"); }
+  catch(e){ toast("Gagal menghapus","err"); }
+}
+
+/* ---------- DATA MANAGEMENT ---------- */
+async function batchDelete(ids){
+  const list=[...ids];
+  while(list.length){
+    const chunk=list.splice(0,400), b=db.batch();
+    chunk.forEach(id=>b.delete(db.collection(COL_P).doc(id)));
+    await b.commit();
+  }
+}
+$("btnClean30").onclick=async ()=>{
+  if(role!=="admin") return;
+  const cut=Date.now()-30*24*60*60*1000;
+  const old=allRecords.filter(r=>{ const t=getTime(r); return t&&t.getTime()<cut; });
+  if(!old.length) return toast("Tidak ada data lebih dari 30 hari");
+  if(!confirm("Hapus "+old.length+" data yang lebih dari 30 hari?")) return;
+  try{ await batchDelete(old.map(r=>r.id)); toast(old.length+" data lama dihapus","ok"); }
+  catch(e){ toast("Gagal menghapus","err"); }
+};
+$("btnWipe").onclick=async ()=>{
+  if(role!=="admin") return;
+  if(prompt('⚠️ Ini akan menghapus SEMUA data patroli secara permanen.\nKetik: HAPUS')!=="HAPUS") return;
+  try{ await batchDelete(allRecords.map(r=>r.id)); toast("Semua data telah dihapus","ok"); }
+  catch(e){ toast("Gagal menghapus","err"); }
+};
+
+/* ---------- EXPORT PDF (ADMIN) ---------- */
+$("btnExport").onclick=()=>{
+  if(role!=="admin") return toast("Export PDF hanya untuk Admin","err");
+  if(!filtered.length) return toast("Tidak ada data untuk diexport","err");
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF("p","mm","a4");
+  const W=210;
+  const drawHead=()=>{
+    doc.setFillColor(22,50,79); doc.rect(0,0,W,26,"F");
+    doc.setFillColor(212,175,55); doc.rect(0,26,W,1.4,"F");
+    try{ doc.addImage(LOGO_KEMEN,"PNG",7,3.5,19.1,19); }catch(e){}
+    try{ doc.addImage(LOGO_PAS,"PNG",W-7-14.1,3.5,14.1,19); }catch(e){}
+    doc.setTextColor(255); doc.setFont("helvetica","bold"); doc.setFontSize(15);
+    doc.text("LAPORAN PATROLI — SAKTI",31.1,11);
+    doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text("Sistem Pemetaan dan Pengawasan Patroli Pengamanan",31.1,17);
+    doc.text("Lapas Kelas IIA Banyuasin",31.1,22);
+  };
+  drawHead();
+  doc.setTextColor(60); doc.setFontSize(8.5);
+  const fd=$("fDate").value||"Semua tanggal", fl=$("fLokasi").value||"Semua lokasi", fp=$("fPetugas").value||"Semua petugas";
+  doc.text(`Filter: ${fd}  |  ${fl}  |  ${fp}   —   Total: ${filtered.length} data   —   Dicetak: ${fmtTime(new Date())} oleh Administrator`,10,33);
+  let y=38;
+  filtered.forEach((r,i)=>{
+    if(y+36>287){ doc.addPage(); drawHead(); y=33; }
+    doc.setDrawColor(200); doc.setLineWidth(.3); doc.roundedRect(10,y,190,34,2,2);
+    const foto=gf(r,["photo","foto","image","img","fotoBase64"]);
+    if(foto){ try{ doc.addImage(foto,"JPEG",13,y+3,28,28); }catch(e){} }
+    doc.setTextColor(22,50,79); doc.setFont("helvetica","bold"); doc.setFontSize(10.5);
+    doc.text(`${i+1}. ${gf(r,["officer","petugas","nama"],"-")}`,46,y+9);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(70);
+    doc.text(`Lokasi : ${gf(r,["location","lokasi","titik"],"-")}`,46,y+16,{maxWidth:150});
+    doc.text(`Waktu  : ${fmtTime(getTime(r))}`,46,y+23);
+    doc.text(`Metode : ${gf(r,["via"],"-")}    NIP: ${gf(r,["nip"],"-")}`,46,y+29);
+    y+=38;
+  });
+  const pages=doc.getNumberOfPages();
+  for(let p=1;p<=pages;p++){ doc.setPage(p); doc.setFontSize(8); doc.setTextColor(140);
+    doc.text(`Halaman ${p} / ${pages}`,W-10,293,{align:"right"});
+    doc.text("Dokumen dihasilkan otomatis oleh SAKTI",10,293); }
+  const ds=new Date().toISOString().slice(0,10);
+  doc.save(`SAKTI_Laporan_Patroli_${ds}.pdf`);
+  toast("PDF berhasil dibuat","ok");
+};
+
+/* ---------- INIT ---------- */
+buildTitik();
+renderIcons();
+setLogos();
+applyRole();
+initFirebase();
 </script>
 </body>
 </html>
