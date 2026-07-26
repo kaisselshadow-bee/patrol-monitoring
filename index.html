@@ -94,6 +94,14 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
 .badge-loc.show{display:flex}
 .loc-display{display:flex;align-items:center;gap:9px;padding:12px 13px;border:1.5px dashed var(--line);border-radius:10px;background:#fafcfe;color:var(--muted);font-size:13.5px;font-weight:600}
 .loc-display.ok{border-style:solid;border-color:#bfe8d6;background:var(--green-soft);color:var(--green)}
+.ket-opts{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ket-opt{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 6px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--muted);transition:.15s}
+.ket-opt:active{transform:scale(.98)}
+#ketAman.active{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+#ketKhusus.active{border-color:var(--amber);background:#fdf3e0;color:#a86a00}
+.ket-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ket-badge.aman{background:var(--green-soft);color:var(--green)}
+.ket-badge.khusus{background:#fdf3e0;color:#a86a00}
 
 /* ===== FOTO ===== */
 .foto-box{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;background:#fafcfe}
@@ -309,6 +317,14 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
         </label>
       </div>
     </div>
+    <div class="field">
+      <label>Keterangan</label>
+      <div class="ket-opts">
+        <button type="button" class="ket-opt active" id="ketAman" onclick="setKet('aman')"><span data-ic="check" data-sz="15"></span>Situasi Aman</button>
+        <button type="button" class="ket-opt" id="ketKhusus" onclick="setKet('khusus')"><span data-ic="note" data-sz="15"></span>Catatan Khusus</button>
+      </div>
+      <input type="text" id="inpKet" class="hide" placeholder="Contoh: Kegiatan Asimilasi" style="margin-top:9px">
+    </div>
     <button class="btn btn-gold" id="btnSimpan"><span data-ic="save" data-sz="17"></span>Simpan ke Cloud</button>
     <button class="btn btn-ghost" id="btnBatal" style="margin-top:8px"><span data-ic="x" data-sz="16"></span>Batal / Reset</button>
   </div>
@@ -345,7 +361,8 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     <div class="card">
       <h2>Filter Data</h2>
       <div class="filter-grid">
-        <div class="field full" style="margin:0"><label>Tanggal</label><input type="date" id="fDate"></div>
+        <div class="field" style="margin:0"><label>Dari Tanggal</label><input type="date" id="fDateFrom"></div>
+        <div class="field" style="margin:0"><label>Sampai Tanggal</label><input type="date" id="fDateTo"></div>
         <div class="field" style="margin:0"><label>Lokasi</label><select id="fLokasi"><option value="">Semua</option></select></div>
         <div class="field" style="margin:0"><label>Petugas</label><select id="fPetugas"><option value="">Semua</option></select></div>
       </div>
@@ -410,7 +427,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     </div>
   </div>
 </section>
-<p class="ver">SAKTI v2.4 • Verifikasi lokasi hanya via QR resmi</p>
+<p class="ver">SAKTI v2.5 • Verifikasi lokasi hanya via QR resmi</p>
 </main>
 
 <!-- ================= LOGIN MODAL ================= -->
@@ -519,7 +536,8 @@ img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" 
 print:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
 clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 alert:'<path d="m10.29 3.86-8.4 14.5A2 2 0 0 0 3.62 21h16.76a2 2 0 0 0 1.73-2.64l-8.4-14.5a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-chev:'<polyline points="6 9 12 15 18 9"/>'
+chev:'<polyline points="6 9 12 15 18 9"/>',
+note:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>'
 };
 function icSVG(n,sz){sz=sz||18;return '<svg class="li" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24">'+(ICON[n]||'')+'</svg>';}
 function renderIcons(){document.querySelectorAll('[data-ic]').forEach(el=>{el.innerHTML=icSVG(el.dataset.ic, el.dataset.sz);});}
@@ -679,6 +697,16 @@ function compress(file,q){
   });
 }
 
+/* ---------- KETERANGAN ---------- */
+let ketMode="aman";
+function setKet(m){
+  ketMode=m;
+  $("ketAman").classList.toggle("active",m==="aman");
+  $("ketKhusus").classList.toggle("active",m==="khusus");
+  $("inpKet").classList.toggle("hide",m!=="khusus");
+  if(m==="khusus") $("inpKet").focus();
+}
+
 /* ---------- SIMPAN ---------- */
 $("btnSimpan").onclick = async ()=>{
   if(!db) return toast("Firebase belum dikonfigurasi","err");
@@ -686,13 +714,15 @@ $("btnSimpan").onclick = async ()=>{
   if(!petugas) return toast("Pilih petugas terlebih dahulu","err");
   if(!scanLokasi) return toast("Scan QR di titik patroli terlebih dahulu","err");
   if(!fotoData) return toast("Ambil foto bukti patroli","err");
+  let keterangan="Situasi Aman";
+  if(ketMode==="khusus"){ keterangan=$("inpKet").value.trim(); if(!keterangan) return toast("Isi catatan khusus terlebih dahulu","err"); }
   const opt=$("selPetugas").selectedOptions[0];
   $("btnSimpan").disabled=true; $("btnSimpan").innerHTML="Menyimpan...";
   try{
     await db.collection(COL_P).add({
       officer: petugas, nip: opt?.dataset.nip||"",
       location: scanLokasi, kode: scanKode,
-      photo: fotoData, via: "QR",
+      photo: fotoData, keterangan, via: "QR",
       timestamp: new Date().toISOString(),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -707,6 +737,7 @@ function resetForm(){
   $("locText").textContent="Belum discan — pindai QR di titik patroli";
   fotoData=""; $("fileFoto").value=""; $("imgPreview").style.display="none";
   $("fotoEmpty").style.display=""; $("badgeLoc").classList.remove("show");
+  $("inpKet").value=""; setKet("aman");
 }
 $("btnBatal").onclick=resetForm;
 
@@ -765,7 +796,9 @@ function renderRekapTitik(){
       `<div class="acc-date">${k} • ${byDate[k].length}x</div>`+
       byDate[k].map(r=>{
         const foto=gf(r,["photo","foto","image","img","fotoBase64"]);
-        return `<div class="acc-row">${foto?`<img src="${foto}" onclick="openPhoto(this.src)" alt="">`:""}<span class="t">${fmtJam(getTime(r))}</span><span class="o">${gf(r,["officer","petugas","nama"],"-")}</span></div>`;
+        const kk=gf(r,["keterangan","ket","catatan"],"");
+        const kkH=(kk&&kk!=="Situasi Aman")?`<span class="ket-badge khusus" style="margin:0;flex:none;max-width:42%">${kk}</span>`:"";
+        return `<div class="acc-row">${foto?`<img src="${foto}" onclick="openPhoto(this.src)" alt="">`:""}<span class="t">${fmtJam(getTime(r))}</span><span class="o">${gf(r,["officer","petugas","nama"],"-")}</span>${kkH}</div>`;
       }).join("")
     ).join("");
     return `<div class="acc ${accOpen[i]?"open":""}">
@@ -783,11 +816,12 @@ function fillLokasiFilter(){
 }
 function applyFilter(resetShown=true){
   if(resetShown) shown=20;
-  const d=$("fDate").value, l=$("fLokasi").value, p=$("fPetugas").value;
+  const d1=$("fDateFrom").value, d2=$("fDateTo").value, l=$("fLokasi").value, p=$("fPetugas").value;
   filtered=allRecords.filter(r=>{
-    if(d){ const t=getTime(r); if(!t) return false;
+    if(d1||d2){ const t=getTime(r); if(!t) return false;
       const ds=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
-      if(ds!==d) return false; }
+      if(d1&&ds<d1) return false;
+      if(d2&&ds>d2) return false; }
     if(l && gf(r,["location","lokasi","titik"])!==l) return false;
     if(p && gf(r,["officer","petugas","nama"])!==p) return false;
     return true;
@@ -795,7 +829,7 @@ function applyFilter(resetShown=true){
   renderHistory();
 }
 $("btnFilter").onclick=()=>applyFilter(true);
-$("btnResetFilter").onclick=()=>{ $("fDate").value=""; $("fLokasi").value=""; $("fPetugas").value=""; applyFilter(true); };
+$("btnResetFilter").onclick=()=>{ $("fDateFrom").value=""; $("fDateTo").value=""; $("fLokasi").value=""; $("fPetugas").value=""; applyFilter(true); };
 $("btnMore").onclick=()=>{ shown+=20; renderHistory(); };
 
 function renderHistory(){
@@ -808,9 +842,11 @@ function renderHistory(){
     const nm=gf(r,["officer","petugas","nama"],"(tanpa nama)");
     const lok=gf(r,["location","lokasi","titik"],"-");
     const via=gf(r,["via"],"");
+    const ket=gf(r,["keterangan","ket","catatan"],"");
+    const ketHTML=ket?`<br><span class="ket-badge ${ket==="Situasi Aman"?"aman":"khusus"}">${ket==="Situasi Aman"?icSVG("check",11):icSVG("note",11)}${ket}</span>`:"";
     return `<div class="hist-item">
       ${foto?`<img class="hist-thumb" src="${foto}" onclick="openPhoto(this.src)" alt="foto">`:`<div class="hist-thumb noimg">${icSVG('img',20)}</div>`}
-      <div class="hist-info"><b>${nm}</b><span class="loc">${icSVG('pin',12)}${lok}</span><br><span class="time">${fmtTime(getTime(r))}${via?" • "+via:""}</span></div>
+      <div class="hist-info"><b>${nm}</b><span class="loc">${icSVG('pin',12)}${lok}</span><br><span class="time">${fmtTime(getTime(r))}${via?" • "+via:""}</span>${ketHTML}</div>
       ${isAdmin?`<button class="btn-del" onclick="delRecord('${r.id}')" title="Hapus (Admin)">${icSVG('trash',15)}</button>`:""}
     </div>`;
   }).join("");
@@ -897,6 +933,7 @@ $("btnWipe").onclick=async ()=>{
 /* ---------- EXPORT PDF (ADMIN) ---------- */
 $("btnExport").onclick=()=>{
   if(role!=="admin") return toast("Export PDF hanya untuk Admin","err");
+  applyFilter(true);
   if(!filtered.length) return toast("Tidak ada data untuk diexport","err");
   const { jsPDF }=window.jspdf;
   const doc=new jsPDF("p","mm","a4");
@@ -914,7 +951,9 @@ $("btnExport").onclick=()=>{
   };
   drawHead();
   doc.setTextColor(60); doc.setFontSize(8.5);
-  const fd=$("fDate").value||"Semua tanggal", fl=$("fLokasi").value||"Semua lokasi", fp=$("fPetugas").value||"Semua petugas";
+  const d1=$("fDateFrom").value, d2=$("fDateTo").value;
+  const fd=(d1||d2)?`${d1||"…"} s/d ${d2||"…"}`:"Semua tanggal";
+  const fl=$("fLokasi").value||"Semua lokasi", fp=$("fPetugas").value||"Semua petugas";
   doc.text(`Filter: ${fd}  |  ${fl}  |  ${fp}   —   Total: ${filtered.length} data   —   Dicetak: ${fmtTime(new Date())} oleh Administrator`,10,33);
   let y=38;
   filtered.forEach((r,i)=>{
@@ -927,7 +966,7 @@ $("btnExport").onclick=()=>{
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(70);
     doc.text(`Lokasi : ${gf(r,["location","lokasi","titik"],"-")}`,46,y+16,{maxWidth:150});
     doc.text(`Waktu  : ${fmtTime(getTime(r))}`,46,y+23);
-    doc.text(`NIP    : ${gf(r,["nip"])||nipOf(gf(r,["officer","petugas","nama"],""))||"-"}`,46,y+29);
+    doc.text(`Ket    : ${gf(r,["keterangan","ket","catatan"],"-")}`,46,y+29,{maxWidth:150});
     y+=38;
   });
   const pages=doc.getNumberOfPages();
