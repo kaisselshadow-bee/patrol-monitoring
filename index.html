@@ -45,6 +45,7 @@ header{background:linear-gradient(135deg,var(--navy-900),var(--navy-700));color:
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .chip-admin{background:var(--gold);color:var(--navy-900);font-weight:800;font-size:10.5px;padding:4px 9px;border-radius:99px;letter-spacing:.4px}
 .btn-auth{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);padding:7px 13px;border-radius:9px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.btn-auth.icon-only{width:36px;padding:8px 0;justify-content:center}
 
 /* ===== TABS ===== */
 nav{position:sticky;top:64px;z-index:40;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(15,36,56,.05)}
@@ -225,6 +226,12 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
   .stats{grid-template-columns:repeat(2,1fr)}
   nav{top:62px}
 }
+@media (max-width:430px){
+  #netTxt{display:none}
+  .pill{padding:6px}
+  .brand{gap:8px}
+  .hd-right{gap:6px}
+}
 </style>
 </head>
 <body>
@@ -403,7 +410,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     </div>
   </div>
 </section>
-<p class="ver">SAKTI v2.2 • Verifikasi lokasi hanya via QR resmi</p>
+<p class="ver">SAKTI v2.4 • Verifikasi lokasi hanya via QR resmi</p>
 </main>
 
 <!-- ================= LOGIN MODAL ================= -->
@@ -538,7 +545,9 @@ function beep(){ try{ const c=new (window.AudioContext||window.webkitAudioContex
 function applyRole(){
   const isAuth = role==="admin"||role==="kakplp";
   const isAdmin = role==="admin";
-  $("btnAuth").innerHTML = isAuth ? icSVG("logout",15)+"Logout" : icSVG("lock",15)+"Login";
+  $("btnAuth").innerHTML = isAuth ? icSVG("logout",17) : icSVG("lock",15)+"Login";
+  $("btnAuth").classList.toggle("icon-only", isAuth);
+  $("btnAuth").title = isAuth ? "Logout" : "Login";
   const chip=$("chipAdmin"); chip.classList.toggle("hide", !isAuth); chip.textContent=isAdmin?"ADMIN":"KA.KPLP";
   $("dashLock").classList.toggle("hide", isAuth);
   $("dashContent").classList.toggle("hide", !isAuth);
@@ -714,6 +723,11 @@ function refreshDash(){
   renderTodayTitik();
   renderRekapTitik();
   applyFilter(false);
+}
+function nipOf(nama){
+  if(!nama) return "";
+  const p=allPetugas.find(x=>String(gf(x,["name","nama"],"")).trim().toLowerCase()===String(nama).trim().toLowerCase());
+  return p?String(gf(p,["nip"],"")):"";
 }
 function titikOf(r){
   const s=((gf(r,["kode"],"")+" "+gf(r,["location","lokasi","titik"],""))+"").toUpperCase();
@@ -913,7 +927,7 @@ $("btnExport").onclick=()=>{
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(70);
     doc.text(`Lokasi : ${gf(r,["location","lokasi","titik"],"-")}`,46,y+16,{maxWidth:150});
     doc.text(`Waktu  : ${fmtTime(getTime(r))}`,46,y+23);
-    doc.text(`Metode : ${gf(r,["via"],"-")}    NIP: ${gf(r,["nip"],"-")}`,46,y+29);
+    doc.text(`NIP    : ${gf(r,["nip"])||nipOf(gf(r,["officer","petugas","nama"],""))||"-"}`,46,y+29);
     y+=38;
   });
   const pages=doc.getNumberOfPages();
