@@ -408,6 +408,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
       <div class="field"><label>NIP (opsional)</label><input type="text" id="inpNip" placeholder="Contoh: 200508242025061003"></div>
       <button class="btn btn-gold" id="btnAddPetugas"><span data-ic="useradd" data-sz="17"></span>Tambah Petugas</button>
       <div id="petugasList" style="margin-top:14px"><div class="empty">Belum ada petugas.</div></div>
+      <button class="btn btn-soft-danger" id="btnCleanPetugas" style="margin-top:12px"><span data-ic="trash" data-sz="15"></span>Bersihkan Dummy &amp; Duplikat</button>
     </div>
 
     <div class="card">
@@ -427,7 +428,7 @@ main{max-width:920px;margin:0 auto;padding:16px 14px 60px}
     </div>
   </div>
 </section>
-<p class="ver">SAKTI v2.5 • Verifikasi lokasi hanya via QR resmi</p>
+<p class="ver">SAKTI v2.7 • Verifikasi lokasi hanya via QR resmi</p>
 </main>
 
 <!-- ================= LOGIN MODAL ================= -->
@@ -617,6 +618,13 @@ async function initFirebase(){
     }, e=>{ console.error(e); toast("Gagal memuat data patroli","err"); });
     db.collection(COL_O).limit(300).onSnapshot(s=>{
       allPetugas = s.docs.map(d=>({id:d.id, ...d.data()}));
+      // AUTO-GUARD: sapu dummy bawaan website lama (cocokkan nama+NIP palsu persis)
+      const auto=allPetugas.filter(p=>FAKE_PETUGAS[String(gf(p,["name","nama"],"")).trim().toLowerCase()]===String(gf(p,["nip"],"")).trim());
+      if(auto.length){
+        const ids=auto.map(p=>p.id);
+        batchDelete(ids,COL_O).then(()=>console.log("Auto-guard: "+ids.length+" dummy dihapus")).catch(()=>{});
+        allPetugas=allPetugas.filter(p=>!ids.includes(p.id));
+      }
       allPetugas.sort((a,b)=>String(gf(a,["name","nama"])).localeCompare(String(gf(b,["name","nama"]))));
       fillPetugasSelects(); renderPetugas();
     }, e=>console.error(e));
@@ -905,12 +913,34 @@ async function delPetugas(id){
   catch(e){ toast("Gagal menghapus","err"); }
 }
 
+/* ---------- BERSIHKAN PETUGAS DUMMY/DUPLIKAT ---------- */
+const DUMMY_PETUGAS=["agus setiawan","budi hartono","candra wijaya","dedi kusuma","eko prasetyo"];
+const FAKE_PETUGAS={"agus setiawan":"199001011234567890","budi hartono":"199102021234567891","candra wijaya":"199203031234567892","dedi kusuma":"199304041234567893","eko prasetyo":"199405051234567894"};
+$("btnCleanPetugas").onclick=async ()=>{
+  if(role!=="admin") return;
+  if(!db) return toast("Firebase belum terhubung","err");
+  const seen=new Set(), del=[]; let nDummy=0, nDup=0;
+  // urutkan agar entri ber-NIP dipertahankan saat ada duplikat
+  const sorted=[...allPetugas].sort((a,b)=>(gf(b,["nip"],"")?1:0)-(gf(a,["nip"],"")?1:0));
+  sorted.forEach(p=>{
+    const nm=String(gf(p,["name","nama"],"")).trim();
+    const key=nm.toLowerCase();
+    if(!nm){ del.push(p.id); return; }
+    if(DUMMY_PETUGAS.includes(key)){ del.push(p.id); nDummy++; return; }
+    if(seen.has(key)){ del.push(p.id); nDup++; } else seen.add(key);
+  });
+  if(!del.length) return toast("Daftar petugas sudah bersih");
+  if(!confirm("Hapus "+del.length+" entri? ("+nDummy+" dummy, "+nDup+" duplikat)")) return;
+  try{ await batchDelete(del,COL_O); toast(del.length+" petugas dibersihkan","ok"); }
+  catch(e){ toast("Gagal membersihkan","err"); }
+};
+
 /* ---------- DATA MANAGEMENT ---------- */
-async function batchDelete(ids){
-  const list=[...ids];
+async function batchDelete(ids,col){
+  const list=[...ids], c=col||COL_P;
   while(list.length){
     const chunk=list.splice(0,400), b=db.batch();
-    chunk.forEach(id=>b.delete(db.collection(COL_P).doc(id)));
+    chunk.forEach(id=>b.delete(db.collection(c).doc(id)));
     await b.commit();
   }
 }
